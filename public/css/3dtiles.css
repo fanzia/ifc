@@ -1,0 +1,114 @@
+html,body{
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	font-size: 12px;
+}
+
+#main{
+	width: 100%;
+	height: 100%;
+}
+
+#left{
+	width: 480px;
+	height: 100%;
+	float: left;
+	padding: 10px;
+}
+
+#tools{
+	height: 40px;
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+.btn {
+    width: 94px;
+    height: 41px;
+    overflow: hidden;
+    display: block;
+    background-color: #2fe8d7;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#right{
+	width:calc(100% - 500px);
+	height: 100%;
+	float: right;
+	background-color: #cdcdcd;
+}
+
+#list{
+	height: calc(100% - 70px);
+	border: 1px solid #cdcdcd;
+	overflow-y: auto;
+}
+
+ul{
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+ul li{
+	margin: 0px;
+	padding: 2px 6px;
+	border-bottom: 1px solid #cdcdcd;
+}
+
+ul li:hover{
+	background-color: #cdcdcd14;
+	cursor: pointer;
+}
+ul li:nth-child(even){
+	background-color: #cdcdcd14;
+}
+
+ul li .ifc-name{
+	width: 300px;
+	float: left;
+	    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
+    overflow: hidden;
+}
+
+ul li .ifc-tool{
+	width: 40px;
+	float: right;
+}
+
+ul li .ifc-time{
+	float: left;
+	width: 120px;
+}
+
+
+ul li .ifc-tool button{
+	background: none;
+	border: none;
+	cursor: pointer;
+}
+
+ul li .ifc-tool button:focus{
+	outline: none;
+}
+
+ul li .ifc-tool button:hover{
+	color: #100101;
+	font-weight: bolder;
+}
+ul li .ifc-tool button:disabled{
+    /*color: #2a6496;*/
+    cursor: not-allowed;
+}
+.clear{
+	clear: both;
+}
