@@ -77,7 +77,8 @@ function writeObj (model) {
 
 
 	function write () {
-		var lodList = model.getLodList();
+		// var lodList = model.getLodList();
+		var lodList = model.getLodList_2();
 		writeItem(lodList);
 	}
 
@@ -123,6 +124,7 @@ function writeObj (model) {
 		output += `# object ${objectModel.getName()} \n\n`;
 
 		output += writePositions(objectModel.getPositions());
+		// output += writePositions_center(objectModel);
 
 		output += writeUvs(objectModel.getUvs());
 
@@ -145,6 +147,20 @@ function writeObj (model) {
 
 		return output;
 	}
+
+	// v  移动到中心点
+	function writePositions_center (objectModel) {
+		var output = '';
+		var positions = objectModel.getPositions();
+		var center = objectModel.getCenter();
+		for(var i = 0; i < positions.length;++i){
+			var point = positions[i];
+			output += `v ${point.getX()-center.getX()} ${point.getZ()-center.getZ()}  ${-point.getY()+ center.getY()}\n`;
+		}
+
+		return output;
+	}
+
 
 	// vt
 	function writeUvs (uvs) {

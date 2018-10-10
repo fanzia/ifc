@@ -1,10 +1,12 @@
 var subdivideWlm = require("./subdivide/subdivideWlm");
-var subdivideTujian = require("./subdivide/subdivideTujian");
+var subdivideTujian = require("./subdivide/subdivideTujian_1");
 var subdivideShuinuan = require("./subdivide/subdivideShuinuan");
 var subdivideNeizhuangshi = require("./subdivide/subdivideNeizhuangshi");
 var subdivideCommon = require("./subdivide/subdivideCommon");
+var subdivideMuqiang = require("./subdivide/subdivideMuqiang");
 var fsExtra = require('fs-extra');
 var path = require('path');
+var Cesium = require("Cesium");
 
 module.exports = subdivide;
 
@@ -55,7 +57,8 @@ function subdivide (model) {
             json["list"].push({
                 id : objectModel.getName(),
                 center : centerWorld,
-                radius : radius
+                radius : radius,
+                center_m : objectModel.getCenter()
             });
         }); 
         var outputFolderPath = model.getOutputFolderPath();
@@ -69,6 +72,7 @@ function subdivide (model) {
     }
 
     function createModelInfo () {
+        var center = model.getCenter();
         var json = {
             uuid : model.getUuid(),
             type : model.getType(),
@@ -76,7 +80,9 @@ function subdivide (model) {
             countX : model.getCountX(),
             countY : model.getCountY(),
             countZ : model.getCountZ(),
-            box : model.getBox()
+            box : model.getBox(),
+            lon : Cesium.Math.toDegrees(center.getX()),
+            lat : Cesium.Math.toDegrees(center.getY())
         };
 
         var outputFolderPath = model.getOutputFolderPath();
@@ -116,6 +122,9 @@ function subdivide (model) {
 		case "common":
             json = subdivideCommon(model);
 			break;
+        case "muqiang":
+            json = subdivideMuqiang(model);
+            break;
 		default:
 			json = subdivideCommon(model);
 			break;

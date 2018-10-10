@@ -51,27 +51,33 @@ html,body{
 	overflow-y: auto;
 }
 
-ul{
+#list ul{
 	list-style: none;
 	margin: 0px;
 	padding: 0px;
 }
 
-ul li{
+#list ul li{
 	margin: 0px;
 	padding: 2px 6px;
 	border-bottom: 1px solid #cdcdcd;
 }
 
-ul li:hover{
+
+#list ul li.active{
+	box-shadow: 0 5px 15px rgba(0,0,0,.5);
+}
+
+#list ul li:hover{
 	background-color: #cdcdcd14;
 	cursor: pointer;
+	box-shadow: 0 5px 15px rgba(0,0,0,.5);
 }
-ul li:nth-child(even){
+#list ul li:nth-child(even){
 	background-color: #cdcdcd14;
 }
 
-ul li .ifc-name{
+#list ul li .ifc-name{
 	width: 300px;
 	float: left;
 	    text-overflow: ellipsis;
@@ -80,24 +86,24 @@ ul li .ifc-name{
     overflow: hidden;
 }
 
-ul li .ifc-tool{
+#list ul li .ifc-tool{
 	width: 40px;
 	float: right;
 }
 
-ul li .ifc-time{
+#list ul li .ifc-time{
 	float: left;
 	width: 120px;
 }
 
 
-ul li .ifc-tool button{
+#list ul li .ifc-tool button{
 	background: none;
 	border: none;
 	cursor: pointer;
 }
 
-ul li .ifc-tool button:focus{
+#list ul li .ifc-tool button:focus{
 	outline: none;
 }
 
@@ -105,10 +111,78 @@ ul li .ifc-tool button:hover{
 	color: #100101;
 	font-weight: bolder;
 }
-ul li .ifc-tool button:disabled{
+#list ul li .ifc-tool button:disabled{
     /*color: #2a6496;*/
     cursor: not-allowed;
 }
 .clear{
 	clear: both;
+}
+
+
+.popup{
+	position: absolute;
+	width: 320px;
+	left: 488px;
+	top: calc(50% - 150px);
+	z-index: 101;
+	border: 1px solid #ccc;
+	background-color: #fff;
+	box-shadow: 0 5px 15px rgba(0,0,0,.5);
+	border-radius: 4px;
+	display: none;
+	border-top-left-radius:none;
+	color :#767676;
+}
+
+.popup .item{
+	margin: 4px;
+}
+
+
+.popup span{
+	display: inline-block;
+}
+.popup .info-item{
+	width: 50px;
+	margin-right: 6px;
+	text-align: right;
+}
+
+.popup .info-name .info-item{
+	text-align: left;
+	width: 30px;
+	margin: 0 4px;
+}
+
+.popup .info-name .info-name{
+	width: 40px;
+}
+
+.popup .main{
+	margin: 14px 0px;
+}
+
+.popup .close{
+	position: absolute;
+	top: -10px;
+	right: -10px;
+	width: 30px;
+	height: 30px;
+	background-color: #fff;
+	display: inline-block;
+	border-radius: 15px;
+	font-size: 30px;
+	line-height: 26px;
+	color: #3c5870;
+    font-weight: bolder;
+    cursor: pointer;
+    text-align: center;
+    vertical-align: middle;
+    background-color: #fff;
+}
+
+.popup .close:hover{
+	color: #cdcdcd;
+	box-shadow: 1px 2px #ccc;
 }

@@ -11,6 +11,7 @@ var path = require("path");
 var bodyParser = require('body-parser');
 var convert = require("./convert");
 var getList = require("./service/getList");
+var getInfo = require("./service/getInfo");
 
 
 
@@ -253,6 +254,12 @@ app.get('/model/:uuid/:lon/:lat/:type/:count_0/:count_x/:count_y/:count_z',funct
 
 app.get('/getList',function (req,res) {
     var json = getList();
+    res.send(JSON.stringify(json));
+})
+
+app.get('/getInfo/:uuid',function (req,res) {
+    var uuid = req.params.uuid;
+    var json = getInfo(uuid);
     res.send(JSON.stringify(json));
 })
 

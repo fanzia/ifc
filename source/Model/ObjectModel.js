@@ -39,6 +39,10 @@ class ObjectModel{
 		this.h = null;
 		this.level = null;
 		this.key = null;
+
+		this.refineType = null;
+		this.geomType = null;
+		this.refineInfo = null;
 	}
 
 	getName(){
@@ -164,6 +168,18 @@ class ObjectModel{
 
 	getKey(){
 		return this.key;
+	}
+
+
+	setRefineType(refineType,geomType,info) {
+		this.refineType = refineType;
+		this.geomType = geomType;
+		this.refineInfo = info;
+	}
+	
+
+	getRefineType(){
+		return this.refineType;
 	}
 
 }

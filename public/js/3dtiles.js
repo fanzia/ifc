@@ -9,6 +9,11 @@ function addEvent () {
 	$(".clear-tiles").click(function () {
 		viewer.scene.primitives.removeAll();	
 	})
+
+	$(".popup .close").click(function(event) {
+		$(".popup").hide();
+		$("#list ul li").removeClass('active');
+	});
 }
 
 
@@ -92,12 +97,26 @@ function showList (json) {
 
 	$("#left #list").html(html);
 
-	$("#list .ifc-tool button").click(function () {
+	$("#list .ifc-tool button").click(function (e) {
+		e.preventDefault();
 		var uuid = $(this).parents("li").attr("uuid");
 		show3dtiles(uuid);
+		return false;
 	})
 
+	$("#list li").click(function (e) {
 
+		$(".popup").hide();
+
+		if($(this).hasClass('active')){
+			$(this).removeClass('active');
+			return;
+		}
+		$("#list ul li").removeClass('active');
+		$(this).addClass('active');
+		var uuid = $(this).attr("uuid");
+		getInfo(uuid);
+	})
 	
 }
 
@@ -128,4 +147,149 @@ function formatDate (date) {
 	 + '-' + (dd[1]?dd:"0"+dd[0]) + ' ' + (hh[1]?hh:"0"+hh[0]) 
 	 + ':' + (mm[1]?mm:"0"+mm[0]) + ':' + (ss[1]?ss:"0"+ss[0]);
 	 return result;
+}
+
+function getInfo (uuid) {
+	$.ajax({
+		url:`/getInfo/${uuid}`,
+		type: 'get',
+		dataType: 'text',
+	})
+	.done(function(result) {
+		console.log(result);
+		var json = JSON.parse(result);
+		showInfo(json);
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+	});
+	
+}
+
+function showInfo (json) {
+	if(json["error"]){
+		console.log(json);
+		alert("无法获取信息");
+		return;
+	}
+	var uuid = json["uuid"];
+	if(!uuid){
+		return;
+	}
+	var type = json.type;
+	var count0 = json.count0;
+	var countX = json.countX;
+	var countY = json.countY;
+	var countZ = json.countZ;
+	var lon = json.lon;
+	var lat = json.lat;
+	var box = json.box;
+
+	var item = $(`#list li[uuid=${uuid}]`);
+
+	if(item.length == 0){
+		return;
+	}
+	var liElement = item[0];
+	var offsetTop = liElement.offsetTop;
+	// $("#list ul li").removeClass('active');
+	// item.addClass('active');
+
+
+
+	var item = $(`#list li[uuid='${uuid}']`);
+	var html = `<div >
+					<div class='item'>
+						<span class='info-item'>uuid:</span>
+						<span class='info-name'>${uuid}</span>
+					</div>
+					<div class='item'>
+						<span class='info-item'>类型:</span>
+						<span class='info-name'>${getIfcType(type) }</span>
+					</div>
+					<div class='item'>
+						<span class='info-item'>中心点:</span>
+						<span class='info-name'>
+							<span class='info-item'>经度:</span>
+							<span class='info-name'>${(lon)?lon:""}</span>
+						</span>
+					</div>
+					<div class='item'>
+						<span class='info-item'></span>
+						<span class='info-name'>
+							<span class='info-item'>纬度:</span>
+							<span class='info-name'>${lat?lat:""}</span>
+						</span>
+					</div>
+					<div class='item'>
+						<span class='info-item'>切分:</span>
+						<span class='info-name'>
+							<span class='info-item'>0级:</span>
+							<span class='info-name'>${count0}</span>
+							<span class='info-item'>X向:</span>
+							<span class='info-name'>${countX}</span>
+						</span>
+					</div>
+					<div class='item'>
+						<span class='info-item'></span>
+						<span class='info-name'>
+							<span class='info-item'>Y向:</span>
+							<span class='info-name'>${countY}</span>
+							<span class='info-item'>Z向:</span>
+							<span class='info-name'>${countZ}</span>
+						</span>
+					</div>
+					${getBoxInfo(box)}
+
+				</div>`;
+
+	$(".popup .main").html(html);
+	$(".popup").css("top",offsetTop + "px").show();
+}
+
+
+function getIfcType (type) {
+	var result = null;
+	switch (type) {
+		case "wlm":
+			result = "外立面";
+			break;
+		case "tujian":
+			result = "土建";
+			break;
+		case "neizhuangshi":
+			result = "内装饰";
+			break;
+		case "shuinuan":
+			result = "水暖";
+			break;
+		default:
+			result = "通用"
+			break;
+	}
+	return result;
+}
+
+function getBoxInfo (box) {
+	if(!box){
+		return;
+	}
+
+	var lon = box.max_lon - box.min_lon;
+	var lat = box.max_lat - box.min_lat;
+	var height = box.max_height - box.min_height;
+
+	return `<div class='item'>
+				<span class='info-item'>范围:</span>
+				<span class='info-name'>
+					<span class='info-item'>X向:</span>
+					<span class='info-name'>${lon?lon.toFixed(2):""}</span>
+					<span class='info-item'>Y向:</span>
+					<span class='info-name'>${lat?lat.toFixed(2):""}</span>
+					<span class='info-item'>Z向:</span>
+					<span class='info-name'>${height?height.toFixed(2):""}</span>
+				</span>
+			</div>`;
 }

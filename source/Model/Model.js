@@ -1,13 +1,14 @@
 var Cesium = require('cesium');
 var defaultValue = Cesium.defaultValue;
 var ObjectModel = require("./ObjectModel");
+var IFC = require("../IFC/IFC");
 var Common = require("../Common");
 var Box = require("./Box");
 var path = require('path');
 var HashMap = require('hashmap');
 
 class Model{
-	constructor(objPath,center,uuid,options){
+	constructor(objPath,center,uuid,options,ifcName){
 		this.objPath = objPath;
 		this.center = center;
 		this.uuid = uuid;
@@ -23,6 +24,9 @@ class Model{
 		// this.outputFolderPath = "E:\\Cesium\\IFCto3dtiles\\public\\data\\output";
 		this.outputFolderPath = path.join(process.cwd(),"public/data/output",uuid);
 		this.mtlName = null;
+
+		var ifcPath = path.join(process.cwd(),"public/data/upload",uuid ,ifcName);
+		this.ifc = new IFC(ifcPath,uuid);
 	}
 
 	getUuid(){
@@ -154,6 +158,68 @@ class Model{
 		return hashmap;
 	}
 
+	// 加上实例化
+	// hashmap<key,hashmap<type,list>>
+	getLodList_2(hashmap){
+		var hashmap = new HashMap();
+		this.models.forEach( function(model, index) {
+			var key = model.getKey();
+			var name = model.getName();
+			var refineType = model.getRefineType();
+			// if(refineType)
+			if(hashmap.get(key)){
+				var typeHashMap = hashmap.get(key);
+				if(refineType){
+					var list = typeHashMap.get(refineType);
+					if(list){
+						list.push(name);
+					}else{
+						typeHashMap.set(refineType,[name]);
+					}
+				}else{
+					var list = typeHashMap.get("b3dm");
+					if(list){
+						list.push(name);
+					}else{
+						typeHashMap.set("b3dm",[name]);
+					}
+				}
+			}else{
+				var typeHashMap = new HashMap();
+				if(refineType){
+					var list = typeHashMap.get(refineType);
+					if(list){
+						list.push(name);
+					}else{
+						typeHashMap.set(refineType,[name]);
+					}
+				}else{
+					var list = typeHashMap.get("b3dm");
+					if(list){
+						list.push(name);
+					}else{
+						typeHashMap.set("b3dm",[name]);
+					}
+				}
+				hashmap.set(key,typeHashMap);
+			}
+
+		})
+
+
+		hashmap.forEach( function(typeHashMap, key) {
+			var b3dmList = typeHashMap.get("b3dm");
+			typeHashMap.forEach( function(list, refineType) {
+
+				if(refineType != "b3dm"&& list.length == 1){
+					b3dmList.push(list[0]);
+					typeHashMap.delete(refineType);
+				}
+			});
+		});
+		return hashmap;
+	}
+
 
 	getModel(name){
 		for(var i = 0; i < this.models.length;++i){
@@ -245,6 +311,11 @@ class Model{
 
 		this.ws.send(JSON.stringify(result));
 
+	}
+
+
+	getIFC(){
+		return this.ifc;
 	}
 }
 

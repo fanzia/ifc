@@ -146,7 +146,7 @@ function subdivideTujian (model) {
 	
 
 
-	function subdivide (model) {
+	function subdivide () {
 		model.sortByArea();
 		var box = model.getBoundingVolume();
 		var json = subdivide_0(box);

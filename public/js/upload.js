@@ -98,6 +98,7 @@ function initUploader () {
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">类型：</div>'
 	    +	'<select class="ifc-type">'
+	    +	'	<option value="muqiang">幕墙</option>'
 	    +	'	<option value="tujian">土建</option>'
 	    +	'	<option value="wlm">外立面</option>'
 	    +	'	<option value="shuinuan">水暖</option>'
@@ -293,7 +294,7 @@ function showCesium (uuid) {
 	})
 
 
-	addMoveEvent();
+	// addMoveEvent();
 
 	var event = function(t){
 	    tile = t;       
@@ -374,6 +375,7 @@ function addMoveEvent () {
                 name = pickedFeature.getProperty("batchIdnew");
             }
         }
+        console.log(name);
         nameOverlay.textContent = name;
 
         // Highlight the feature if it's not already selected.
