@@ -170,7 +170,7 @@ class ObjectModel{
 		return this.key;
 	}
 
-
+	// 实例化类型
 	setRefineType(refineType,geomType,info) {
 		this.refineType = refineType;
 		this.geomType = geomType;
@@ -180,6 +180,14 @@ class ObjectModel{
 
 	getRefineType(){
 		return this.refineType;
+	}
+
+	getGeomType(){
+		return this.geomType;
+	}
+
+	getRefineInfo(){
+		return this.refineInfo;
 	}
 
 }

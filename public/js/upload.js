@@ -12,6 +12,9 @@ function init () {
 
 	initUploader();
 
+
+	javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats(); $("#right")[0].appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='../js/stats.min.js';document.head.appendChild(script);})()
+
 	// 开始处理
 	$("#btn_begin").click(function(){
 		beginConvert();
@@ -84,6 +87,17 @@ function initUploader () {
 	    + 	'	<div class="state">等待上传</div>'
 	    +	'</div>'
 	    +	'<div class="file-item" >'
+	    +	'<div class="label">任务名称：</div>'
+	    +	'<input type="text" value="'+ file.name +'" class="model-name">'
+	    +	'</div>'
+	    +	'<div class="file-item" >'
+	    +	'<div class="label">是否实例化：</div>'
+	    +	'<select class="instanced">'
+	    +	'	<option value="yes">实例化</option>'
+	    +	'	<option value="no">不实例化</option>'
+	    +	'</select>'
+	    +	'</div>'
+	    +	'<div class="file-item" >'
 	    +	'<div class="label">中心点经度：</div>'
 	    +	'<input type="text" value="117.19131460833329" class="center-lon">'
 	    +	'</div>'
@@ -91,6 +105,7 @@ function initUploader () {
 	    +	'<div class="label">中心点纬度：</div>'
 	    +	'<input type="text" value="39.12627008333333" class="center-lat">'
 	    +	'</div>'
+
 	    // +	'<div class="file-item" >'
 	    // +	'<div class="label">面个数：</div>'
 	    // +	'<input type="text" value="5000" class="face-limit">'
@@ -169,10 +184,11 @@ function initUploader () {
 	});
 }
 
-function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,callback) {
+function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,callback) {
 	$.ajax({
 		type:"get",
-		url : "/model/" + filename + "/" + lon + "/" + lat + "/" + type+ "/" + count_0 + "/" + count_x + "/" + count_y + "/" + count_z,
+		url : "/model/" + filename + "/" + lon + "/" + lat + "/" + type+ "/" + count_0 + "/" + count_x + "/" + count_y + "/" + count_z
+			+ "/"+ instanced +"/" + modelName,
 		dataType : "text",
 		success:function(result){
 			console.log(result);
@@ -213,8 +229,11 @@ function beginConvert () {
 	var count_z = $(".count-z").val(); 
 	var type = $(".ifc-type").val();
 
+	var instanced = $(".instanced").val();
+	var modelName = $(".model-name").val();
+
 	date = new Date();
-	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,
+	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,
 		function(result){
 		showMessage(result);
 		result = JSON.parse(result);
@@ -286,7 +305,7 @@ function showMap () {
 function showCesium (uuid) {
 	viewer.scene.primitives.removeAll();
 	tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-      url : "public/data/output/" + uuid + "/tiles",
+      url : "public/data/output/" + uuid + "/tiles/tileset.json",
 	}));
 	tileset.readyPromise.then(function(tileset) {
 	    viewer.camera.viewBoundingSphere(tileset.boundingSphere, new Cesium.HeadingPitchRange(0, -0.5, 0));

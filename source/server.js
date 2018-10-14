@@ -183,7 +183,7 @@ app.post('/file_upload',function(req,res){
 });
 
 // 执行转换操作
-app.get('/model/:uuid/:lon/:lat/:type/:count_0/:count_x/:count_y/:count_z',function(req,res){
+app.get('/model/:uuid/:lon/:lat/:type/:count_0/:count_x/:count_y/:count_z/:instanced/:modelName',function(req,res){
     var uuid = req.params.uuid;
     var lon = req.params.lon;
     var lat = req.params.lat;
@@ -193,6 +193,13 @@ app.get('/model/:uuid/:lon/:lat/:type/:count_0/:count_x/:count_y/:count_z',funct
     var count_x = req.params.count_x;
     var count_y = req.params.count_y;
     var count_z = req.params.count_z;
+    var instanced = req.params.instanced;
+    if(instanced == "no"){
+        instanced = false;
+    }else{
+        instanced = true;
+    }
+    var modelName = req.params.modelName;
     if(uuid == null || lon == null || lat == null || type == null
         || count_0 == null || count_x == null || count_y == null || count_z == null){
         response = {
@@ -215,7 +222,9 @@ app.get('/model/:uuid/:lon/:lat/:type/:count_0/:count_x/:count_y/:count_z',funct
         count_0 : count_0,
         count_x : count_x,
         count_y : count_y,
-        count_z : count_z
+        count_z : count_z,
+        instanced : instanced,
+        modelName : modelName
     };
 
 
@@ -237,7 +246,9 @@ app.get('/model/:uuid/:lon/:lat/:type/:count_0/:count_x/:count_y/:count_z',funct
                 count_0 : g_params.count_0,
                 count_x : g_params.count_x,
                 count_y : g_params.count_y,
-                count_z : g_params.count_z
+                count_z : g_params.count_z,
+                instanced : g_params.instanced,
+                modelName : g_params.modelName
             });
 
             file_uuid = null, center_lon = null,center_lat = null,face_limit = null;

@@ -58,7 +58,7 @@ function createTiles (model) {
 				tilesList.forEach( function(f, index) {
 					var tileFile = path.join(filePath,f);
 					var name = tileFile.substring(tileFile.lastIndexOf("."));
-					if(name != ".json"){
+					if(name == ".cmpt"){
 						moveFile(outputFolderPath,tileFile);
 					}
 				});

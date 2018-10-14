@@ -11,7 +11,7 @@ module.exports = obj23dtiles;
 obj23dtiles.combine = combine;
 
 function obj23dtiles(objPath, outputPath, options) {
-    console.time('Total');
+    // console.time('Total');
 
     if(typeof options.tilesetOptions === 'string') {
         options.tilesetOptions = fsExtra.readJsonSync(options.tilesetOptions);
@@ -29,7 +29,7 @@ function obj23dtiles(objPath, outputPath, options) {
             options.batchId = true;
             options.b3dm = true;
 
-            obj2Tileset(objPath, outputPath, options)
+            return obj2Tileset(objPath, outputPath, options)
                 .then(function(result) {
                     var b3dm = result.b3dm;
                     var batchTableJson = result.batchTableJson;
@@ -50,21 +50,26 @@ function obj23dtiles(objPath, outputPath, options) {
                     return Promise.all(tasks);
                 })
                 .then(function() {
-                    console.timeEnd('Total');
+                    // console.timeEnd('Total');
+                    return new Promise(function(resolve){
+                        return resolve({
+                            info : "success"
+                        });
+                    });
                 })
                 .catch(function(error) {
                     console.log(error.message || error);
-                    process.exit(1);
+                    // process.exit(1);
                 });
         } else if (options.i3dm) {
             options.binary = true;
             options.batchId = false;
             if (!options.customFeatureTable) {
                 console.log('Convert to i3dm need a custom FeatureTable.');
-                process.exit(1);
+                // process.exit(1);
             }
 
-            obj2Tileset(objPath, outputPath, options)
+            return obj2Tileset(objPath, outputPath, options)
                 .then(function(result) {
                     var i3dm = result.i3dm;
                     var batchTableJson = result.batchTableJson;
@@ -85,11 +90,16 @@ function obj23dtiles(objPath, outputPath, options) {
                     return Promise.all(tasks);
                 })
                 .then(function() {
-                    console.timeEnd('Total');
+                    // console.timeEnd('Total');
+                    return new Promise(function(resolve){
+                        return resolve({
+                            info : "success"
+                        });
+                    });
                 })
                 .catch(function(error) {
                     console.log(error.message || error);
-                    process.exit(1);
+                    // process.exit(1);
                 });
         }
     }
@@ -114,7 +124,7 @@ function obj23dtiles(objPath, outputPath, options) {
             })
             .catch(function(error) {
                 console.log(error.message || error);
-                process.exit(1);
+                // process.exit(1);
             });
     }
     else if(options && options.i3dm) {
@@ -122,7 +132,7 @@ function obj23dtiles(objPath, outputPath, options) {
         options.batchId = false;
         if (!options.customFeatureTable) {
             console.log('Convert to i3dm need a custom FeatureTable.');
-            process.exit(1);
+            // process.exit(1);
         }
         obj2I3dm(objPath, options)
             .then(function(result){
@@ -142,7 +152,7 @@ function obj23dtiles(objPath, outputPath, options) {
             })
             .catch(function(error) {
                 console.log(error.message || error);
-                process.exit(1);
+                // process.exit(1);
             });
     }
     else {
@@ -163,7 +173,7 @@ function obj23dtiles(objPath, outputPath, options) {
             })
             .catch(function(error) {
                 console.log(error.message || error);
-                process.exit(1);
+                // process.exit(1);
             });
     }
 }

@@ -18,6 +18,8 @@ class Model{
 		this.countX = defaultValue(options.count_x,1);
 		this.countY = defaultValue(options.count_y,1);
 		this.countZ = defaultValue(options.count_z,1);
+		this.instanced = defaultValue(options.instanced,true);
+		this.modelName = defaultValue(options.modelName,ifcName);
 		this.models = [];
 		this.box = null;
 		this.ws = defaultValue(options.ws,null);
@@ -47,6 +49,14 @@ class Model{
 
 	getFlap(){
 		return this.flap;
+	}
+
+	getModelName(){
+		return this.modelName;
+	}
+
+	getInstanced(){
+		return this.instanced;
 	}
 
 	// 加载一个模型
@@ -209,6 +219,10 @@ class Model{
 
 		hashmap.forEach( function(typeHashMap, key) {
 			var b3dmList = typeHashMap.get("b3dm");
+			if(!b3dmList){
+				typeHashMap.set("b3dm",[]);
+			}
+			b3dmList = typeHashMap.get("b3dm");
 			typeHashMap.forEach( function(list, refineType) {
 
 				if(refineType != "b3dm"&& list.length == 1){

@@ -58,7 +58,12 @@ function subdivide (model) {
                 id : objectModel.getName(),
                 center : centerWorld,
                 radius : radius,
-                center_m : objectModel.getCenter()
+                center_m : objectModel.getCenter(),
+                box : {
+                    x : box.max_lon - box.min_lon,
+                    y : box.max_lat - box.min_lat,
+                    z : box.max_height - box.min_height
+                }
             });
         }); 
         var outputFolderPath = model.getOutputFolderPath();
@@ -82,7 +87,9 @@ function subdivide (model) {
             countZ : model.getCountZ(),
             box : model.getBox(),
             lon : Cesium.Math.toDegrees(center.getX()),
-            lat : Cesium.Math.toDegrees(center.getY())
+            lat : Cesium.Math.toDegrees(center.getY()),
+            modelName : model.getModelName(),
+            instanced : model.getInstanced()
         };
 
         var outputFolderPath = model.getOutputFolderPath();

@@ -66,7 +66,7 @@ class Common{
 	}
 
 	static getBoundingVolume(box,center){
-		if(box){
+		if(!box){
 			return null;
 		}
 

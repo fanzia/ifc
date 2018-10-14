@@ -128,4 +128,104 @@ function zoomTo (model) {
         }    
             });
 }
-Total: 36.671ms
+
+
+
+function addTest (uuid,refineType) {
+    tileset_i3dm = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      url : "public/data/output/"+uuid+"/objs/2_0_0_0/Instanced" + refineType
+    }));
+    tileset_i3dm.style = new Cesium.Cesium3DTileStyle({
+       "show": "true","color":"rgba(255,0,0,1)"
+    });
+
+
+    tileset_b3dm = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      url : "public/data/output/"+uuid + "/objs/2_0_0_0/Batchedb3dm_" + refineType
+    }));
+    tileset_b3dm.style = new Cesium.Cesium3DTileStyle({
+       "show": "true","color":"rgba(0,255,0,1)"
+    });
+}
+
+
+
+E:\Cesium\hengda\ifc\2-21\tujian\B1>IfcConvert.exe B1.ifc --use-element-guids --model-offset -362841.6568;-2923742.3293;0  --precision 5 
+
+
+IfcConvert.exe B1.ifc --use-element-guids --model-offset -363113.111;-2923740.310;0  --precision 5 
+
+
+
+.,3240599759
+
+IfcConvert.exe B1.ifc --use-element-guids --model-offset -781175.512;-3240599.759;0  --precision 5 
+
+
+
+
+    
+    var refineType = "66904";
+    var uuid_b = "134657ac-8899-48be-be87-d28049a86977";
+    var uuid_i = "0f874673-bf3d-47c5-9ceb-c925ced48611";
+    tileset_i3dm = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      url : "public/data/output/"+uuid_i+"/objs/2_0_0_0/Instanced" + refineType
+    }));
+    tileset_i3dm.style = new Cesium.Cesium3DTileStyle({
+       "show": "true","color":"rgba(255,0,0,1)"
+    });
+
+
+    tileset_b3dm = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      url : "public/data/output/"+uuid_b + "/objs/2_0_0_0/Batchedb3dm_" + refineType
+    }));
+    tileset_b3dm.style = new Cesium.Cesium3DTileStyle({
+       "show": "true","color":"rgba(0,255,0,1)"
+    });
+
+
+    362841.6568,2923742.3293
+
+2-1 
+363113.103,   2923740.312
+363113.4111， 2923739.6185   1175550.0 到正北的角度17°57' 43"
+-0.3081 0.6935
+271.4462 -2.0173
+
+2-2
+363059.098, 2923757.821
+363059.4069,2923757.1281    1175550.0 到正北的角度17.96°
+-0.3089 0.6929
+217.4412 15.4917
+
+2-21
+363113.111, 2923740.310
+363113.4193,2923739.6169    1175550.0 到正北的角度17.96°
+
+-0.3083 0.6931
+271.4542 -2.0193
+|  0.95125729235096980  0.30839838480300397 0  363113111 |
+| -0.30839838480300397  0.95125729235096980 0 2923740310 |
+|  0.00000000000000000 -0.00000000000000000 1          0 |
+|  0.00000000000000000  0.00000000000000000 0          1 |
+
+
+
+
+2-21-shui
+781175512.,3240599759.
+|  0.96253700286315880  0.27115036072114596 0  781175512 |
+| -0.27115036072114596  0.96253700286315880 0 3240599759 |
+|  0.00000000000000000 -0.00000000000000000 1          0 |
+|  0.00000000000000000  0.00000000000000000 0          1 |
+
+
+revit 基点
+参考模型土建 - 21地块
+781175.5111,3240599.7583   -19790.6   15.73°
+
+
+
+
+备注
+grid设置水暖，重新计算范围，防止范围不完整

@@ -63,12 +63,17 @@ function readIFC (model) {
 		var id_IFCPRODUCTDEFINITIONSHAPE = strList[strList.length-2];
 		var str_IFCPRODUCTDEFINITIONSHAPE = hashmap.get(id_IFCPRODUCTDEFINITIONSHAPE);
 		if(!str_IFCPRODUCTDEFINITIONSHAPE){
-			console.log(`无效id${id_IFCPRODUCTDEFINITIONSHAPE}`);
+			// 太多了，暂时屏蔽
+			// console.log(`无效id${id_IFCPRODUCTDEFINITIONSHAPE}`);
 			return;
 		}
 
 		var id_objectModel = strList[0];
 		id_objectModel = id_objectModel.replace(/'/g,'');
+
+		if(id_objectModel == "0mPrWLfiP6teKEF41l_UTI"){
+			console.log('调试');
+		}
 
 		var objectModel = model.getModel(id_objectModel);
 		if(!objectModel){
@@ -98,7 +103,14 @@ function readIFC (model) {
 		// }
 		if(geometryType == "SweptSolid"){
 			var info = getSweptSolidInfo(list);
-			objectModel.setRefineType(typeID,geometryType,info);
+			if(info){
+				objectModel.setRefineType(typeID,geometryType,info);
+			}
+		}else if(geometryType == "MappedRepresentation"){
+			var info = getMappedInfo(id,list);
+			if(info){
+				objectModel.setRefineType(typeID,geometryType,info);
+			}
 		}
 
 
@@ -115,22 +127,36 @@ function readIFC (model) {
 
 		// #309= IFCEXTRUDEDAREASOLID(#305,#308,#19,125.);	
 		list = str_value_IFCEXTRUDEDAREASOLID.split(",");
-		var id_IFCRECTANGLEPROFILEDEF = list[0];
+		var id_IFC_PROFILEDEF = list[0];
 		var id_IFCAXIS2PLACEMENT3D = list[1];
 		var id_dirction_z = list[2];
 		var z_length = parseFloat(list[3]);
 
 
+		// 可能是长方体也可能是圆柱体
 		// #305= IFCRECTANGLEPROFILEDEF(.AREA.,'\X2\900198CE\X0\',#304,4695.20168082382,1390.);
-		var str_value_IFCRECTANGLEPROFILEDEF = ifc.getHashMapStringValue(id_IFCRECTANGLEPROFILEDEF);
-		if(!str_value_IFCRECTANGLEPROFILEDEF){
-			console.log(`无效id${id_IFCRECTANGLEPROFILEDEF}`);
+		// #18798= IFCCIRCLEPROFILEDEF(.AREA.,'\X2\7A7A8C0356DE6C34\X0\',#18797,21.);
+		var str_value_IFC_PROFILEDEF = ifc.getHashMapStringValue(id_IFC_PROFILEDEF);
+		if(!str_value_IFC_PROFILEDEF){
+			console.log(`无效id${id_IFC_PROFILEDEF}`);
 			return;
 		}
 
-		var list = str_value_IFCRECTANGLEPROFILEDEF.split(",");
-		var x_length = parseFloat(list[list.length-2]);
-		var y_length = parseFloat(list[list.length-1]);
+		var str_IFC_PROFILEDEF= hashmap.get(id_IFC_PROFILEDEF);
+		var ifc_PROFILEDEF_type = str_IFC_PROFILEDEF.slice(0,str_IFC_PROFILEDEF.indexOf("(")).trim();
+
+		var x_length = 0,y_length = 0;
+		if(ifc_PROFILEDEF_type == "IFCRECTANGLEPROFILEDEF"){
+			var list = str_value_IFC_PROFILEDEF.split(",");
+			x_length = parseFloat(list[list.length-2]);
+			y_length = parseFloat(list[list.length-1]);
+		}else if(ifc_PROFILEDEF_type == "IFCCIRCLEPROFILEDEF"){
+			return null;
+			x_length = 0;
+			y_length = 0;
+		}else{
+			return null;
+		}
 
 
 		// #308= IFCAXIS2PLACEMENT3D(#306,#19,#17);
@@ -139,7 +165,6 @@ function readIFC (model) {
 			console.log(`无效id${id_IFCAXIS2PLACEMENT3D}`);
 			return;
 		}
-
 
 		var list = str_value_IFCAXIS2PLACEMENT3D.split(",");
 		var id_IFCCARTESIANPOINT = list[0];
@@ -227,6 +252,59 @@ function readIFC (model) {
 			z : Cesium.Math.toDegrees(angle_z)
 		};
 	}
+
+
+	function getMappedInfo (id,list) {
+		// #35507= IFCPLATE('0m5vqcy496oBmzeJ2bcHVb',#41,'\X2\7CFB7EDF5D4C677F\X0\:\X2\73BB7483\X0\:601237',$,'\X2\73BB7483\X0\',#35505,#35492,'601237');
+		var str_value_entity = ifc.getHashMapStringValue(id);
+		if(!str_value_entity){
+			return;
+		}
+		var strList = str_value_entity.trim().split(",");
+		// #35505
+		var id_IFCLOCALPLACEMENT = strList[strList.length -3];
+		if(!id_IFCLOCALPLACEMENT){
+			return;
+		}
+
+		// #35505= IFCLOCALPLACEMENT(#35486,#35504);
+		var str_value_IFCLOCALPLACEMENT = ifc.getHashMapStringValue(id_IFCLOCALPLACEMENT);
+		if(!str_value_IFCLOCALPLACEMENT){
+			return;
+		}
+
+		var list = str_value_IFCLOCALPLACEMENT.split(",");
+		var id_IFCAXIS2PLACEMENT3D = list[list.length-1];
+
+		// #35504= IFCAXIS2PLACEMENT3D(#35500,#19,#35502);
+		var str_value_IFCAXIS2PLACEMENT3D = ifc.getHashMapStringValue(id_IFCAXIS2PLACEMENT3D);
+		if(!str_value_IFCAXIS2PLACEMENT3D){
+			return;
+		}
+
+
+		var list = str_value_IFCAXIS2PLACEMENT3D.split(",");
+		var id_z_IFCDIRECTION = list[1];
+		var id_x_IFCDIRECTION = list[2];
+
+		var x_cartesian = getCartesianByDirection(id_x_IFCDIRECTION,"x");
+		var z_cartesian = getCartesianByDirection(id_z_IFCDIRECTION,"z");
+		var y_cartesian = getCartesianY(x_cartesian,z_cartesian);
+
+		var direction = {
+			x : x_cartesian,
+			y : y_cartesian,
+			z : z_cartesian
+		};
+		var angle = getAngleByDirection(direction);
+
+		var info = {
+			direction : direction,
+			angle : angle
+		};
+		return info;
+	}
+
 
 
 	return readLines(ifc.getIFCPath(),parseLine)

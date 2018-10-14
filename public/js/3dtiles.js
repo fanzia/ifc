@@ -6,6 +6,10 @@ function init () {
 }
 
 function addEvent () {
+
+	javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats(); $("#right")[0].appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='../js/stats.min.js';document.head.appendChild(script);})()
+
+	
 	$(".clear-tiles").click(function () {
 		viewer.scene.primitives.removeAll();	
 	})
@@ -122,9 +126,9 @@ function showList (json) {
 
 
 function show3dtiles (uuid) {
-	viewer.scene.primitives.removeAll();
+	// viewer.scene.primitives.removeAll();
 	tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-      url : "public/data/output/" + uuid + "/tiles",
+      url : "public/data/output/" + uuid + "/tiles/tileset.json",
 	}));
 	tileset.readyPromise.then(function(tileset) {
 	    viewer.camera.viewBoundingSphere(tileset.boundingSphere, new Cesium.HeadingPitchRange(0, -0.5, 0));
@@ -186,6 +190,10 @@ function showInfo (json) {
 	var lon = json.lon;
 	var lat = json.lat;
 	var box = json.box;
+	var modelName = json.modelName;
+	var instanced = json.instanced;
+
+	instanced = instanced?"是":"否";
 
 	var item = $(`#list li[uuid=${uuid}]`);
 
@@ -202,8 +210,16 @@ function showInfo (json) {
 	var item = $(`#list li[uuid='${uuid}']`);
 	var html = `<div >
 					<div class='item'>
+						<span class='info-item'>名称:</span>
+						<span class='info-name'>${(modelName)?modelName:""}</span>
+					</div>
+					<div class='item'>
 						<span class='info-item'>uuid:</span>
 						<span class='info-name'>${uuid}</span>
+					</div>
+					<div class='item'>
+						<span class='info-item'>实例化:</span>
+						<span class='info-name'>${instanced}</span>
 					</div>
 					<div class='item'>
 						<span class='info-item'>类型:</span>

@@ -1,4 +1,5 @@
 var Box = require("../Model/Box");
+var Common = require("../Common");
 module.exports = subdivideNeizhuangshi;
 function subdivideNeizhuangshi (model) {
 	
@@ -64,7 +65,7 @@ function subdivideNeizhuangshi (model) {
 			return null;
 		}
 
-		var boundingVolume = Common.getBoundingVolume(model_box,model.getCenterWorld());
+		var boundingVolume = Common.getBoundingVolume(model_box,model.getCenter());
 
 		var scaleBox = boundingVolume.scaled(4);
 		var json = {
@@ -76,14 +77,14 @@ function subdivideNeizhuangshi (model) {
 			},
 			"geometricError": 0,
 			"content":{
-				"url" :level + "/" +  h +  "/" + x + "/" + y  + ".b3dm"
+				"url" :level + "/" +  h +  "/" + x + "/" + y  + ".cmpt"
 			}
 		}
 		return json;
 	}
 	
 
-	function subdivide (model) {
+	function subdivide () {
 		model.sortByArea();
 		var box = model.getBoundingVolume();
 		var json = subdivide_0(box);

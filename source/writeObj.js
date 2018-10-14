@@ -31,6 +31,17 @@ function writeObj (model) {
 		}
 	}
 
+	function createObjKeyFolder (key) {
+		try {
+			var outputFolderPath = model.getOutputFolderPath();
+			var objKeyPath = path.join(outputFolderPath,"objs",key);
+			fsExtra.emptyDirSync(objKeyPath);
+			model.sendMessage("info",`创建${key}文件夹成功`);
+		} catch(err) {
+			model.sendMessage("error",`创建${key}文件夹失败:${err}`);
+		}
+	}
+
 	// 移动纹理文件
 	function moveMtlPath () {
 		try {
@@ -79,43 +90,297 @@ function writeObj (model) {
 	function write () {
 		// var lodList = model.getLodList();
 		var lodList = model.getLodList_2();
-		writeItem(lodList);
+		// writeItem(lodList);
+		// lodList.forEach( function(value, key) {
+		// 	writeItem(value,key);
+		// });
+		var keys = lodList.keys();
+		for(var i = 0; i <keys.length;++i){
+			var key = keys[i];
+			var value = lodList.get(key);
+			writeItem(value,key);
+		}
 	}
 
-	function writeItem(lodList) {
-		lodList.forEach( function(value, key) {
-			currentName = key;
-			currentList = value;
-			var output = '';
-			currentPositionIndex = 0;
-			currentUvIndex = 0;
-			currentNormalIndex = 0;
 
-			output += `mtllib ${model.getMtlName()}\n`;
-			for(var i = 0; i < currentList.length;++i){
-				var id = currentList[i];
-				var objectModel = model.getModel(id);
-				if(objectModel == null){
-					continue;
+	// function writeItem(lodList) {
+	// 	lodList.forEach( function(value, key) {
+	// 		currentName = key;
+	// 		currentList = value;
+	// 		var output = '';
+	// 		currentPositionIndex = 0;
+	// 		currentUvIndex = 0;
+	// 		currentNormalIndex = 0;
+
+	// 		output += `mtllib ${model.getMtlName()}\n`;
+	// 		for(var i = 0; i < currentList.length;++i){
+	// 			var id = currentList[i];
+	// 			var objectModel = model.getModel(id);
+	// 			if(objectModel == null){
+	// 				continue;
+	// 			}
+	// 			output += writeObjectModel(objectModel);
+	// 		}
+
+
+	// 		var outputFolderPath = model.getOutputFolderPath();
+	// 		var objName = path.join(outputFolderPath,"objs",currentName+".obj");
+	// 		try {
+	// 			fs.writeFileSync(objName,output,"utf8");
+	// 			model.sendMessage("info",`写入${currentName}成功`);
+	// 		} catch(err) {
+	// 			model.sendMessage("info",`写入${currentName}失败:${err}`);
+	// 		}
+	// 	});
+	// }
+
+
+	function writeItem (typeHashMap,key) {
+		// 创建key文件夹
+		createObjKeyFolder(key);
+		var instanced = model.getInstanced();
+		typeHashMap.forEach( function(list, refineType) {
+			if(refineType == "b3dm"){
+				// currentName = key;
+				// currentList = list;
+				if(list.length == 0){
+					return;
 				}
-				output += writeObjectModel(objectModel);
-			}
+				var output = '';
+				currentPositionIndex = 0;
+				currentUvIndex = 0;
+				currentNormalIndex = 0;
+
+				output += `mtllib ../${model.getMtlName()}\n`;
+				for(var i = 0; i < list.length;++i){
+					var id = list[i];
+					var objectModel = model.getModel(id);
+					if(objectModel == null){
+						continue;
+					}
+					output += writeObjectModel(objectModel,false);
+				}
 
 
-			var outputFolderPath = model.getOutputFolderPath();
-			var objName = path.join(outputFolderPath,"objs",currentName+".obj");
-			try {
-				fs.writeFileSync(objName,output,"utf8");
-				model.sendMessage("info",`写入${currentName}成功`);
-			} catch(err) {
-				model.sendMessage("info",`写入${currentName}失败:${err}`);
+				var outputFolderPath = model.getOutputFolderPath();
+				var objName = path.join(outputFolderPath,"objs",key, "b3dm.obj");
+				try{
+					fs.writeFileSync(objName,output,"utf8");
+					model.sendMessage("info",`写入${key}成功`);
+				} catch(err) {
+					model.sendMessage("info",`写入${key}失败:${err}`);
+				}
+			}else{
+
+				if(instanced){
+					//  实例化
+					currentPositionIndex = 0;
+					currentUvIndex = 0;
+					currentNormalIndex = 0;
+					refineType = refineType.slice(1);
+					writeInstanceModel(key,refineType,list);
+				}else{
+					var output = '';
+					currentPositionIndex = 0;
+					currentUvIndex = 0;
+					currentNormalIndex = 0;
+
+					output += `mtllib ../${model.getMtlName()}\n`;
+					for(var i = 0; i < list.length;++i){
+						var id = list[i];
+						var objectModel = model.getModel(id);
+						if(objectModel == null){
+							continue;
+						}
+						output += writeObjectModel(objectModel,false);
+					}
+
+					refineType = refineType.slice(1);
+					var outputFolderPath = model.getOutputFolderPath();
+					var objName = path.join(outputFolderPath,"objs",key, "b3dm_" + refineType +".obj");
+					try{
+						fs.writeFileSync(objName,output,"utf8");
+						model.sendMessage("info",`写入${currentName}成功`);
+					} catch(err) {
+						model.sendMessage("info",`写入${currentName}失败:${err}`);
+					}
+				}
 			}
 		});
-
-
 	}
 
-	function writeObjectModel (objectModel) {
+	// 创建实例化模型
+	function writeInstanceModel(key,refineType,list) {
+		writeInstanceObj(key,refineType,list);
+		writeInstanceFeatureTable(key,refineType,list);
+		writeInstanceBatchTable(key,refineType,list);
+	}
+
+	// 创建实例化模型的obj
+	function writeInstanceObj (key,refineType,list) {
+		var first = list[0];
+		var objectModel = model.getModel(first);
+		// var refineType = objectModel.getRefineType();
+
+		// 输出obj
+		var output = `mtllib ../${model.getMtlName()}\n`;
+		output += writeObjectModel(objectModel,true);
+		var outputFolderPath = model.getOutputFolderPath();
+		var objName = path.join(outputFolderPath,"objs",key,refineType+".obj");
+		try{
+			fs.writeFileSync(objName,output,"utf8");
+			model.sendMessage("info",`写入${currentName}成功`);
+		} catch(err) {
+			model.sendMessage("info",`写入${currentName}失败:${err}`);
+		}
+	}
+
+
+	// 创建实例化模型的featureTable
+	function writeInstanceFeatureTable (key,refineType,list) {
+		
+		var first = list[0];
+		var firstObjectModel = model.getModel(first);
+		var firstRefineInfo = firstObjectModel.getRefineInfo();
+		var position = [];
+		var orientation = [];
+		var scale = [];
+
+		for(var i = 0; i < list.length;++i){
+			var objectModel = model.getModel(list[i]);
+			if(!objectModel){
+				continue;
+			}
+
+			// 调试用
+			if(list[i] == "0mPrWLfiP6teKEF41l_UTI"){
+				console.log('调试');
+			}
+
+
+			var geomType = objectModel.getGeomType();
+			var refineInfo = objectModel.getRefineInfo();
+			var center = objectModel.getCenter();
+			if(geomType == "SweptSolid"){
+				position.push([
+					center.getX(),center.getY(),center.getZ()
+					]);
+				var o_and_s = getOrientationScale(firstRefineInfo,refineInfo);
+
+				orientation.push(o_and_s.orientation);
+				scale.push(o_and_s.scale);
+			}else if(geomType == "MappedRepresentation"){
+				position.push([
+					center.getX(),center.getY(),center.getZ()
+					]);
+				var o = getOrientation(firstRefineInfo,refineInfo);
+				orientation.push(o);
+				scale.push([1,1,1]);
+			}
+		}
+
+
+		var featureTableJson = {
+			"position" : position,
+			"orientation" : orientation,
+			"scale" : scale
+		};
+
+
+		var outputFolderPath = model.getOutputFolderPath();
+		var jsonPath = path.join(outputFolderPath,"objs",key,refineType + "_featureTable.json");
+		try {
+		    fsExtra.writeJsonSync(jsonPath,featureTableJson);
+		    model.sendMessage("info","创建featureTable.json成功");
+		} catch(err) {
+		    model.sendMessage("error","创建featureTable.json失败:"+err);
+		}
+	}
+
+	// 根据参照计算旋转和缩放
+	function getOrientationScale (firstRefineInfo,refineInfo) {
+
+
+		var angle_x = refineInfo.angle.x - firstRefineInfo.angle.x;
+		var angle_y = refineInfo.angle.y - firstRefineInfo.angle.y;
+		var angle_z = refineInfo.angle.z - firstRefineInfo.angle.z;
+
+		var size = refineInfo.size;
+		var firstSize = firstRefineInfo.size;
+
+
+		var scale_x = (firstSize.x == 0) ? 1 :size.x/firstSize.x;
+		var scale_y = (firstSize.y == 0) ? 1 :size.y/firstSize.y;
+		var scale_z = (firstSize.z == 0) ? 1 :size.z/firstSize.z;
+
+		var scale = [scale_x,scale_y,scale_z];
+		var firstAngleZ = firstRefineInfo.angle.z;
+		if(firstAngleZ == -90 || firstAngleZ == 90 ){
+			scale = [scale_y,scale_x,scale_z];
+		}
+
+		if(angle_z<0){
+			// angle_z = 360 + angle_z;
+			angle_z = -angle_z;
+		}
+		var orientation = [
+			angle_x,
+			angle_y,
+			angle_z
+		];
+		return {
+			orientation : orientation,
+			scale : scale
+		}
+	}
+
+	// 计算旋转角度
+	function getOrientation (firstRefineInfo,refineInfo) {
+		var angle_x = refineInfo.angle.x - firstRefineInfo.angle.x;
+		var angle_y = refineInfo.angle.y - firstRefineInfo.angle.y;
+		var angle_z = refineInfo.angle.z - firstRefineInfo.angle.z;
+
+		if(angle_z<0){
+			// angle_z = 360 + angle_z;
+			angle_z = -angle_z;
+		}
+		var orientation = [
+			angle_x,
+			angle_y,
+			angle_z
+		]; 
+		return orientation;
+	}
+
+	function writeInstanceBatchTable (key,refineType,list) {
+		var batchID = [];
+		var name = [];
+		for(var i = 0; i < list.length;++i){
+			var objectModel = model.getModel(list[i]);
+			if(!objectModel){
+				continue;
+			}
+			batchID.push(i);
+			name.push(objectModel.getName() + "_1");
+
+		}
+
+		var batchTableJson = {
+			"batchID" : batchID,
+			"name" : name
+		};
+
+		var outputFolderPath = model.getOutputFolderPath();
+		var jsonPath = path.join(outputFolderPath,"objs",key,refineType + "_batchTable.json");
+		try {
+		    fsExtra.writeJsonSync(jsonPath,batchTableJson);
+		    model.sendMessage("info","创建batchTable.json成功");
+		} catch(err) {
+		    model.sendMessage("error","创建batchTable.json失败:"+err);
+		}
+	}
+
+	function writeObjectModel (objectModel,centerFlag) {
 		if(!objectModel){
 			return "";
 		}
@@ -123,9 +388,12 @@ function writeObj (model) {
 		
 		output += `# object ${objectModel.getName()} \n\n`;
 
-		output += writePositions(objectModel.getPositions());
-		// output += writePositions_center(objectModel);
-
+		if(centerFlag){
+			output += writePositions_center(objectModel);
+		}else{
+			output += writePositions(objectModel.getPositions());
+		}
+		
 		output += writeUvs(objectModel.getUvs());
 
 		output += writeNormals(objectModel.getNormals());

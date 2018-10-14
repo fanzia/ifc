@@ -1,6 +1,6 @@
 var Box = require("../Model/Box");
-module.exports = subdivideWlm;
-function subdivideWlm (model) {
+module.exports = subdivideTujian;
+function subdivideTujian (model) {
 	
 	// // 第0级
 	function subdivide_0(box){
@@ -9,7 +9,7 @@ function subdivideWlm (model) {
 		var models = model.getModels();
 		for(var i = 0; i < models.length && count < count0;++i){
 			var objectModel = models[i];
-			if(objectModel.getIFCType() == "IfcWallStandardCase"){
+			if(objectModel.getIFCType() == "IfcSlab"){
 				objectModel.setParam(0,0,0,0);
 				count++;
 			}
@@ -78,7 +78,7 @@ function subdivideWlm (model) {
 			var centerWorld = objectModel.getCenterWorld();
 			if(!box.isPointIn(centerWorld) || objectModel.getKey() != null
 				|| (ifcType != "IfcSlab" && ifcType != "IfcWall"
-				&& ifcType != "IfcWallStandardCase" && ifcType != "IfcBuildingElementProxy")){
+				&& ifcType != "IfcWallStandardCase")){
 				continue;
 			}
 			count++;
@@ -173,6 +173,9 @@ function subdivideWlm (model) {
 		}
 		return tilesetJson;
 	}
+
+
+
 
 	return subdivide();
 

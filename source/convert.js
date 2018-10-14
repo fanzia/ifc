@@ -5,7 +5,7 @@ var Model = require("./Model/Model");
 var Point = require("./Model/Point");
 var readObj = require("./readObj");
 var writeObj = require("./writeObj");
-var obj23dtiles	= require("./obj23dtiles");
+var convert23dtiles	= require("./convert23dtiles");
 var createTiles	= require("./createTiles");
 var subdivide = require("./subdivide");
 var Cesium = require("cesium");
@@ -81,7 +81,9 @@ function convert (uuid,options) {
 			count_x : options.count_x,
 			count_y : options.count_y,
 			count_z : options.count_z,
-			ws : options.ws
+			ws : options.ws,
+			instanced : options.instanced,
+			modelName : options.modelName
 		};
 
 		var ifcName = getIFCName(uuid);
@@ -125,7 +127,7 @@ function convert (uuid,options) {
 							.then(function (result) {
 								writeObj(result.model)
 									.then(function (result) {
-										obj23dtiles(result.model)
+										convert23dtiles(result.model)
 											.then(function (result) {
 												model.sendMessage("info","转换3dtiles结束");
 												createTiles(model);

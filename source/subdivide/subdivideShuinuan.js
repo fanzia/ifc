@@ -37,7 +37,7 @@ function subdivideShuinuan (model) {
 			},
 			"geometricError": 1,
 			"content":{
-				"url" : 0+ "/" +  0 +  "/" + 0 + "/" + 0  + ".b3dm"
+				"url" : 0+ "/" +  0 +  "/" + 0 + "/" + 0  + ".cmpt"
 			},
 			"children":[]
 		}
@@ -99,7 +99,7 @@ function subdivideShuinuan (model) {
 			 	},
 			 	"geometricError": 0.25,
 			 	"content":{
-			 		"url" : level + "/" + h +  "/" + x + "/" + y  + ".b3dm",
+			 		"url" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
 			 		"boundingVolume":{
 			 			"region":box.toArray()
 			 		}
@@ -137,7 +137,7 @@ function subdivideShuinuan (model) {
 			},
 			"geometricError": 0,
 			"content":{
-				"url" : level + "/" + h +  "/" + x + "/" + y  + ".b3dm",
+				"url" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
 			}
 		}
 		return json;
@@ -145,7 +145,7 @@ function subdivideShuinuan (model) {
 
 	
 
-	function subdivide (model) {
+	function subdivide () {
 		model.sortByArea();
 		var box = model.getBoundingVolume();
 		var json = subdivide_0(box);

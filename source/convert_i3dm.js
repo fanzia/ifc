@@ -6,7 +6,8 @@ var fsExtra = require('fs-extra');
 var obj2Tileset = require('./obj23dtiles/lib/obj2Tileset');
 var makeCompositeTile = require("./3dtiles/makeCompositeTile");
 // convert_i3dm();
-makeCmpt();
+// makeCmpt();
+convert_i3dm_t();
 function makeCmpt () {
 	var b3dmPath = "E:\\Cesium\\ifc\\public\\data\\output\\a\\cmpt\\0.b3dm";
 	var i3dmPath = "E:\\Cesium\\ifc\\public\\data\\output\\a\\cmpt\\0.i3dm";
@@ -25,19 +26,36 @@ function convert_i3dm () {
 
 	var outputFolderPath = "E:\\Cesium\\ifc\\public\\data\\output\\a";
 	var options = {
-		tilesetOptions : path.join(outputFolderPath,"option.json"),
-		tileset : true,
+		// tilesetOptions : path.join(outputFolderPath,"option.json"),
+		tileset : false,
 		i3dm : true,
 		customFeatureTable : path.join(outputFolderPath,"featureTable.json"),
 		customBatchTable : path.join(outputFolderPath,"0_0_0_0_batchTable.json")
 
 	};
 	var objPath = "E:\\Cesium\\ifc\\public\\data\\output\\a\\0_0_0_0.obj";
-	var outputPath = path.join(outputFolderPath,"0.i3dm");
+	var outputPath = path.join(outputFolderPath,"b","0.i3dm");
 
 	obj2tileset_o(objPath,outputPath,options);
 }
 
+
+
+function convert_i3dm_t () {
+	var outputFolderPath = "E:\\Cesium\\ifc\\public\\data\\output\\b3fa0e25-4756-4f3c-8de9-99ed1cb98216\\objs\\2_0_0_0";
+	var options = {
+		tilesetOptions : path.join(outputFolderPath,"option.json"),
+		tileset : true,
+		i3dm : true,
+		customFeatureTable : path.join(outputFolderPath,"172085_featureTable_1.json"),
+		customBatchTable : path.join(outputFolderPath,"172085_batchTable_1.json")
+
+	};
+	var objPath = "E:\\Cesium\\ifc\\public\\data\\output\\b3fa0e25-4756-4f3c-8de9-99ed1cb98216\\objs\\2_0_0_0\\172085.obj";
+	var outputPath = path.join(outputFolderPath,"0.i3dm");
+
+	obj2tileset_o(objPath,outputPath,options);
+}
 function obj2tileset_o (objPath, outputPath, options) {
 	console.time('Total');
 	if(typeof options.tilesetOptions === 'string') {
