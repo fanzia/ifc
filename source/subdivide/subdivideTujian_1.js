@@ -1,6 +1,13 @@
 var Box = require("../Model/Box");
+var Point = require("../Model/Point");
+var Common = require("../Common");
+var lineIntersect = require("line-intersect");
+
+
+
 module.exports = subdivideTujian;
 function subdivideTujian (model) {
+	var ifc = model.getIFC();
 	
 	// // 第0级
 	function subdivide_0(box){
@@ -72,21 +79,150 @@ function subdivideTujian (model) {
 	function subdivide_1 (box,level,x,y,h) {
 		var models = model.getModels();
 		var count = 0;
+		var modelBox = null;
+
+		var modelCenter = model.getBox().getCenter();
+		var delta = model.getBox().getRadius()/3;
+
 		for(var i = 0; i < models.length;++i){
 			var objectModel = models[i];
-			var ifcType = objectModel.getIFCType();
+			var objectModelBox = objectModel.getBox();
+
+
+
 			var centerWorld = objectModel.getCenterWorld();
+			if(!box.isPointIn(centerWorld)){
+				continue;
+			}
+
+			if(objectModel.getName().indexOf("19KcUM3mrDf8FcGPGgWy0k") !=-1){
+				console.log(objectModel);
+			}
+
+			if(!modelBox){
+				modelBox = objectModelBox;
+			}else{
+				modelBox = modelBox.merge(objectModelBox);
+			}
+			var ifcType = objectModel.getIFCType();
+			
 			if(!box.isPointIn(centerWorld) || objectModel.getKey() != null
 				|| (ifcType != "IfcSlab" && ifcType != "IfcWall"
 				&& ifcType != "IfcWallStandardCase")){
 				continue;
 			}
-			count++;
-			objectModel.setParam(level,x,y,h);
+			var spaceIDs = objectModel.getSpaceIDs();
+			var spaceIDsLength = spaceIDs.length;
+			if(spaceIDsLength == 1){
+				// 只属于一个空间，那么是外墙面
+				// console.log(`${objectModel.getName()},${spaceIDs}`);
+				count++;
+				objectModel.setParam(level,x,y,h);
+			}else if(spaceIDsLength >1){
+				// count++;
+				// objectModel.setParam(level,x,y,h);
+
+				var flag = false;
+				// 同时属于多个空间，则判断交点
+				console.log(`${objectModel.getName()},${spaceIDs}`);
+				var point_min = new Point(objectModelBox.min_lon,objectModelBox.min_lat);
+				var point_max = new Point(objectModelBox.max_lon,objectModelBox.max_lat);
+				for(var k = 0; k < spaceIDsLength;++k){
+					var space_1 = ifc.getIFCSpace(spaceIDs[k]);
+					if(!space_1){
+						continue;
+					}
+					var space_1_center = space_1.getCenter();
+					for(var j = k+1; j < spaceIDsLength;++j){
+						var space_2 = ifc.getIFCSpace(spaceIDs[j]);
+						if(!space_2){
+							continue;
+						}
+						var space_2_center = space_2.getCenter();
+
+						var intersectResult = lineIntersect.checkIntersection(point_min.getX(),point_min.getY(),point_max.getX(),point_max.getY(),space_1_center.getX(),space_1_center.getY(),
+							space_2_center.getX(),space_2_center.getY());
+						if(intersectResult.type != "none"){
+							flag = true;
+							console.log(intersectResult);
+							continue;
+						}
+					}
+				}
+				// 相交过
+				if(!flag){
+					count++;
+					objectModel.setParam(level,x,y,h);
+				}
+			}else{
+				
+				count++;
+				objectModel.setParam(level,x,y,h);
+				// 暂时屏蔽
+				// 强制计算中心点
+				// var center = objectModel.getCenter();
+				// var distance = Math.sqrt(Math.pow(center.getX()-modelCenter.getX(),2)+Math.pow(center.getY()-modelCenter.getY(),2));
+				// if(distance>delta){
+				// 	count++;
+				// 	objectModel.setParam(level,x,y,h);
+				// }
+				// var key = model.getModelGridKey(objectModel.getName());
+				// if(key){
+				// 	var min_x = key.min_x;
+				// 	var min_y = key.min_y;
+
+				// 	var flag = true;
+
+				// 	// 先判断最小的区域
+				// 	for(var m = min_x-1;m < min_x+4;++m){
+				// 		for(var n = min_y-1;n < min_y+4;++n){
+				// 			var value = model.getGridValue(m,n);
+				// 			if(!value){
+				// 				flag = false;
+				// 				break;
+				// 			}
+				// 		}
+				// 	}
+				// 	if(!flag){
+				// 		count++;
+				// 		objectModel.setParam(level,x,y,h);
+				// 	}else{
+				// 		var max_x = key.max_x;
+				// 		var max_y = key.max_y;
+
+
+				// 		// 最大点的区域
+				// 		for(var m = max_x-1;m < max_x+4;++m){
+				// 			for(var n = max_y-1;n < max_y+4;++n){
+				// 				var value = model.getGridValue(m,n);
+				// 				if(!value){
+				// 					flag = false;
+				// 					break;
+				// 				}
+				// 			}
+				// 		}
+
+				// 		if(!flag){
+				// 			count++;
+				// 			objectModel.setParam(level,x,y,h);
+				// 		}
+				// 	}
+
+				// }else{
+				// 	count++;
+				// 	objectModel.setParam(level,x,y,h);
+				// }
+
+			}
+			// count++;
+			// objectModel.setParam(level,x,y,h);
 
 		}
 
+		var modelBoxWorld = Common.getBoundingVolume(modelBox,model.getCenter());
+
 		var childJson = subdivide_2(box,2,x,y,h);
+		// var childJson = null;
 		var json = null;
 		if(count == 0){
 			if(childJson){
@@ -96,12 +232,14 @@ function subdivideTujian (model) {
 			json = {
 			 	"boundingVolume":{
 			 		"region":box.toArray()
+			 		// "region":modelBoxWorld.toArray()
 			 	},
-			 	"geometricError": 0.25,
+			 	"geometricError": 0.15,
 			 	"content":{
 			 		"url" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
 			 		"boundingVolume":{
 			 			"region":box.toArray()
+			 			// "region":modelBoxWorld.toArray()
 			 		}
 			 	},
 			 	"children":[]

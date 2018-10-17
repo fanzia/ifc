@@ -74,6 +74,10 @@ class Box {
 
     // 合并
     merge(b){
+        if(!b){
+            return this;
+        }
+
         var min_lon = this.min_lon > b.min_lon ? b.min_lon : this.min_lon;
         var max_lon = this.max_lon < b.max_lon ? b.max_lon : this.max_lon;
         var min_lat = this.min_lat > b.min_lat ? b.min_lat : this.min_lat;

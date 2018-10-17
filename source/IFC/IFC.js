@@ -7,6 +7,15 @@ class IFC{
 		this.hashmap = new HashMap();
 
 		this.typeHashMap = new HashMap();
+
+		this.spaceHashMap = new HashMap();
+
+		this.spaceWallsHashMap = new HashMap();
+
+
+		this.aggregatesHashMap = new HashMap();
+
+		this.ifcSpacesHashMap = new HashMap(); 
 	}
 
 
@@ -23,6 +32,20 @@ class IFC{
 		return this.typeHashMap;
 	}
 
+	// #737215= IFCRELSPACEBOUNDARY('22f_W9ewb4g83ZXZQz0QyG',#41,'1stLevel',$,#343,#16851,#444,.PHYSICAL.,.INTERNAL.);
+	// 记录 #343 [#16851,...]
+	getSpaceHashMap(){
+		return this.spaceHashMap;
+	}
+	// 记录 #343 [#uuid,#uuid]
+	getSpaceWallsHashMap(){
+		return this.spaceWallsHashMap;
+	}
+
+
+	getAggregatesHaspMap(){
+		return this.aggregatesHashMap;
+	}
 
 	getHashMapStringValue(key){
 		var value = this.hashmap.get(key);
@@ -31,6 +54,17 @@ class IFC{
 		}
 
 		return value.slice(value.indexOf("(")+1,value.lastIndexOf(")"));
+	}
+
+
+	addIFCSpace(spaceID,ifcSpace){
+		if(!this.ifcSpacesHashMap.get(spaceID)){
+			this.ifcSpacesHashMap.set(spaceID,ifcSpace);
+		}
+	}
+
+	getIFCSpace(spaceID){
+		return this.ifcSpacesHashMap.get(spaceID);
 	}
 }
 

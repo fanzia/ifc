@@ -3,6 +3,7 @@ var path = require("path");
 var IFC = require("./IFC");
 var fsExtra = require('fs-extra');
 var Cesium = require('cesium');
+var IFCSpace = require("./IFCSpace");
 
 
 module.exports =  readIFC;
@@ -12,6 +13,9 @@ function readIFC (model) {
 
 	var hashmap = ifc.getHashMap();
 	var typeHashMap = ifc.getTypeHashMap();
+	var spaceHashMap = ifc.getSpaceHashMap();
+	var spaceWallsHashMap = ifc.getSpaceWallsHashMap();
+	var aggregatesHashMap = ifc.getAggregatesHaspMap();
 
 
 	function parseLine (line) {
@@ -26,8 +30,9 @@ function readIFC (model) {
 		hashmap.set(key,value);
 
 		var ifcKey = value.slice(0,value.indexOf("("));
-		var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+		
 		if(ifcKey == "IFCRELDEFINESBYTYPE"){
+			var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
 			var valueList = ifcInfo.split(",");
 			var typeListStr = ifcInfo.slice(ifcInfo.lastIndexOf("(")+1,ifcInfo.lastIndexOf(")"))
 			var typeID = valueList[valueList.length -1];
@@ -35,6 +40,19 @@ function readIFC (model) {
 			typeHashMap.set(typeID,typeList);
 			// 查找每一个id model.getObjecetModel(),赋予defineType
 			checkTypeList(typeID,typeList);
+		}else if(ifcKey == "IFCRELSPACEBOUNDARY"){
+			var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+			var valueList = ifcInfo.split(",");
+			var spaceID = valueList[4];
+			var wallID = valueList[5];
+			checkSpaceBoundary(spaceID,wallID);
+		}else if(ifcKey == "IFCRELAGGREGATES"){
+			var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+			var valueList = ifcInfo.split(",");
+			var key = valueList[4];
+			// var list = valueList[5];
+			var list = ifcInfo.slice(ifcInfo.lastIndexOf("(")+1,ifcInfo.lastIndexOf(")")).split(",");
+			aggregatesHashMap.set(key,list);
 		}
 	}
 
@@ -89,14 +107,14 @@ function readIFC (model) {
 		// #310= IFCSHAPEREPRESENTATION(#102,'Body','SweptSolid',(#309));
 		var str_value_IFCSHAPEREPRESENTATION = ifc.getHashMapStringValue(id_IFCSHAPEREPRESENTATION);
 		if(!str_value_IFCSHAPEREPRESENTATION){
-			console.log(`无效id${id_IFCSHAPEREPRESENTATION}`);
+			// console.log(`无效id${id_IFCSHAPEREPRESENTATION}`);
 			return;
 		}
 
 		var list = str_value_IFCSHAPEREPRESENTATION.split(",");
 		var geometryType = list[list.length-2];
 		geometryType = geometryType.replace(/'/g,'');
-		console.log(geometryType);
+		// console.log(geometryType);
 		// if(geometryType != "SweptSolid"){
 		// 	console.log(geometryType + "无法处理");
 		// 	return;
@@ -151,6 +169,7 @@ function readIFC (model) {
 			x_length = parseFloat(list[list.length-2]);
 			y_length = parseFloat(list[list.length-1]);
 		}else if(ifc_PROFILEDEF_type == "IFCCIRCLEPROFILEDEF"){
+			// 圆柱形暂时不处理
 			return null;
 			x_length = 0;
 			y_length = 0;
@@ -306,11 +325,152 @@ function readIFC (model) {
 	}
 
 
+	// #737215= IFCRELSPACEBOUNDARY('22f_W9ewb4g83ZXZQz0QyG',#41,'1stLevel',$,#343,#16851,#444,.PHYSICAL.,.INTERNAL.);
+	// 检查空间边界
+	function checkSpaceBoundary (spaceID,wallKey) {
+		var wallList = spaceWallsHashMap.get(spaceID);
+		var wallKeys = spaceHashMap.get(spaceID);
+		if(wallKeys){
+			if(wallKeys.indexOf(wallKey) == -1){
+				wallKeys.push(wallKey);
+				var list = changeWallKeyToIDs(wallKey);
+				wallList = wallList.concat(list);
+				spaceWallsHashMap.set(spaceID,wallList);
+
+				// if(list){
+				// 	wallList = wallList.concat(list);
+				// }
+			}	
+		}else{
+			// var list = [];
+			// var list = changeWallKeyToIDs(wallKey);
+			// if(list){
+			// 	wallList = list
+			// }
+
+			spaceHashMap.set(spaceID,[wallKey]);
+			var list = changeWallKeyToIDs(wallKey);
+			spaceWallsHashMap.set(spaceID,list);
+			
+			// wallList = wallList.concat(list);
+		}
+	}
+
+	// 根据实体分割来确定具体是哪些ID
+	function changeWallKeyToIDs (wallKey) {
+		var str_value_wall = ifc.getHashMapStringValue(wallKey);
+		if(!str_value_wall){
+			return null;
+		}
+
+		var list = str_value_wall.split(",");
+		var id_wall = list[0];
+		id_wall = id_wall.replace(/'/g,'');
+		var objectModel = model.getModel(id_wall);
+		if(objectModel){
+			return [id_wall];
+		}
+
+		// 可能是幕墙
+		var str_wall = hashmap.get(wallKey);
+
+		var wall_type = str_wall.slice(0,str_wall.indexOf("(")).trim();
+		// console.log(wall_type);
+		if(wall_type == "IFCCURTAINWALL"){
+			return [wallKey];
+		}
+	}
+
+	// 替换幕墙
+	function checkCurtainWall () {
+		spaceWallsHashMap.forEach(function (list,key) {
+			for(var i = 0; i < list.length;++i){
+				var id = list[i];
+				var modelIDs = [];
+				if(id.length < 20){
+					var ids = aggregatesHashMap.get(id);
+					list.splice(i,1);
+					if(!ids){
+						return;
+					}
+					for(var j = 0; j < ids.length;++j){
+						var str_value = ifc.getHashMapStringValue(ids[j]);	
+						var str_value_list = str_value.split(",");
+						var id_objectModel = str_value_list[0].replace(/'/g,'');
+						var objectModel = model.getModel(id_objectModel);
+						if(objectModel){
+							modelIDs.push(id_objectModel);
+						}
+					}
+
+					var newList = list.concat(modelIDs);
+					spaceWallsHashMap.set(key,newList);
+				}
+			}
+		})
+	}	
+
+	function getSpaceList () {
+		spaceWallsHashMap.forEach(function (list,key) {
+			var str = ``;
+			for(var i = 0; i < list.length;++i){
+				str += `${list[i]}|`
+			}
+			str = str.slice(0,str.length-1);
+			// console.log(key);
+			// console.log(str);
+		})
+
+		spaceWallsHashMap.forEach( function(list, key) {
+			var spaceCenter = null;
+			var spaceBox = null;
+			for(var i = 0; i < list.length;++i){
+				var id = list[i];
+				var objectModel = model.getModel(id);
+				if(!objectModel){
+					continue;
+				}
+				// var ifcType = objectModel.getIFCType();
+				// if(ifcType != "IfcWall" && ifcType != "IfcSlab" && ifcType != "IfcWallStandardCase"){
+				// 	continue;
+				// }
+
+				objectModel.addSpaceID(key);
+				// 计算中心点
+				var center = objectModel.getCenter();
+				if(!spaceCenter){
+					spaceCenter = center;
+				}else{
+					spaceCenter.lon = (center.lon + spaceCenter.lon)/2;
+					spaceCenter.lat = (center.lat + spaceCenter.lat)/2;
+					spaceCenter.height = (center.height + spaceCenter.height)/2;
+				}
+
+				// 计算包围矩形
+				var objectModelBox = objectModel.getBox();
+				if(!spaceBox){
+					spaceBox = objectModelBox;
+				}else{
+					spaceBox = spaceBox.merge(objectModelBox);
+				}
+			}
+			console.log(`${key}: ${spaceCenter.getX()},${spaceCenter.getY()},${spaceCenter.getZ()}`);
+			var boxCenter = spaceBox.getCenter();
+			console.log(`${key}: ${boxCenter.getX()},${boxCenter.getY()},${boxCenter.getZ()}`);
+			var ifcSpace = new IFCSpace(key,boxCenter,list);
+			ifc.addIFCSpace(key,ifcSpace);
+		});
+	}
+
+
 
 	return readLines(ifc.getIFCPath(),parseLine)
 		.then(function(){
+			// 解析结束，开始替换curtainwall幕墙集合
+			checkCurtainWall();
 
-			// 
+			getSpaceList();
+
 			return new Promise(function(resolve){
 				return resolve({
 					model : model

@@ -43,6 +43,9 @@ class ObjectModel{
 		this.refineType = null;
 		this.geomType = null;
 		this.refineInfo = null;
+
+		// 所属的space空间，可能属于多个
+		this.spaceIDs = [];
 	}
 
 	getName(){
@@ -132,6 +135,9 @@ class ObjectModel{
 
 
 	getArea(){
+		if(!this.box){
+			return null;
+		}
 		return this.box.getArea();
 	}
 
@@ -188,6 +194,15 @@ class ObjectModel{
 
 	getRefineInfo(){
 		return this.refineInfo;
+	}
+
+
+	addSpaceID(spaceID){
+		this.spaceIDs.push(spaceID);
+	}
+
+	getSpaceIDs(){
+		return this.spaceIDs;
 	}
 
 }

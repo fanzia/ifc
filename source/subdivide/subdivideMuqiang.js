@@ -342,6 +342,21 @@ function subdivideMuqiang (model) {
 			'0nkrcUA719GuSoF3vmShbl',
 			'0nkrcUA719GuSoF3vmShcD',
 			'0nkrcUA719GuSoF3vmShd8'];
+		var list = ['3J$wvBuV13cQZrEpwzDMIk',
+'0DqP81Qgf4LhzEqZmjSXWV',
+'0DqP81Qgf4LhzEqZmjSXWR',
+'0DqP81Qgf4LhzEqZmjSZ9J',
+'3rFteWDT5FewGQ3DzJ10yt',
+'3rFteWDT5FewGQ3DzJ10ys',
+'1VBqVb0v5Cq9wnVgW5emH2',
+'2H6hn2HCz6OAT7a2fHiyap',
+'1VBqVb0v5Cq9wnVgW5emCm',
+'3rFteWDT5FewGQ3DzJ10yo',
+'1VBqVb0v5Cq9wnVgW5em0C',
+'1VBqVb0v5Cq9wnVgW5etg0',
+'1VBqVb0v5Cq9wnVgW5etgh',
+'1VBqVb0v5Cq9wnVgW5em0C',
+'1VBqVb0v5Cq9wnVgW5etg0'];
 		var models = model.getModels();
 		for(var i = 0; i < models.length ;++i){
 			var objectModel = models[i];

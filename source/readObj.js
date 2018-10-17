@@ -5,6 +5,7 @@ var Point = require("./Model/Point");
 var SmoothGroup = require("./Model/SmoothGroup");
 var Face = require("./Model/Face");
 var Promise = require('bluebird');
+var HashMap = require('hashmap');
 
 module.exports = readObj;
 function readObj (model) {
@@ -216,6 +217,99 @@ function readObj (model) {
 
 	}
 
+	// 测试-计算范围轮廓
+	function getBorderGrid () {
+		var modelBox = model.getBox();
+		var width = modelBox.max_lon-modelBox.min_lon;
+		var height = modelBox.max_lat-modelBox.min_lat;
+		var count = 20;
+		var size = null;
+		if(width> height){
+			size = height/count;
+		}else{
+			size = width/count;
+		}
+		var widthCount = Math.ceil(width/size);
+		var heightCount = Math.ceil(height/size);
+		var models = model.getModels();
+		var hashMap = new HashMap();
+
+		for(var i = 0; i < widthCount;++i){
+			for(var j = 0; j < heightCount;++j){
+				var box = {
+					min_lon : modelBox.min_lon + i*size,
+					max_lon : modelBox.min_lon + (i+1)*size,
+					min_lat : modelBox.min_lat + j*size,
+					max_lat : modelBox.min_lat + (j+1)*size,
+				};
+				var center = {
+					x : modelBox.min_lon + i*size + size/2,
+					y : modelBox.min_lat + j*size + size/2
+				}
+				for(var k = 0; k<models.length;++k){
+					var objectModel = models[k];
+					var objectModelBox = objectModel.getBox();
+					// if(center.x < objectModelBox.max_lon && center.y > objectModelBox.min_lon &&
+					// 	center.y < objectModelBox.max_lat &&center.y > objectModelBox.min_lat){
+					// 	hashMap.set(i+"_"+j,true);
+					// 	break;
+					// }
+					// var min_x = Math.max(box.min_lon,objectModelBox.min_lon);
+					// var min_y = Math.max(box.min_lat,objectModelBox.min_lat);
+					// var max_x = Math.min(box.max_lon,objectModelBox.max_lon);
+					// var max_y = Math.min(box.max_lat,objectModelBox.max_lat);
+					// if(min_x > max_x || min_y > max_y){
+					// 	// 不想交
+					// }else{
+					// 	hashMap.set(i+"_"+j,true);
+					// 	break;
+					// }
+					var result = isIntersect(objectModelBox,box);
+					if(result){
+						hashMap.set(i+"_"+j,true);
+						break;
+					}
+				}
+				if(!(hashMap.get(i+"_"+j))){
+					hashMap.set(i+"_"+j,false);
+				}
+				
+			}
+		}
+		console.log(hashMap);
+
+		for(var i = heightCount-1;i>=0;i--){
+			var str = '';
+			for(var j = 0; j < widthCount;++j){
+				var key = j + "_" + i; 
+				var value = hashMap.get(key);
+				if(value== true){
+					str += "y" + ",";
+				}else if(value == false){
+					str += "n" + ",";
+				}else{
+					str += "b" + ",";
+				}
+			}
+			console.log(str);
+		}
+
+	}
+
+	function isIntersect (box1,box2) {
+		var x01 = box1.min_lon,x02 = box1.max_lon,y01 = box1.min_lat,y02=box1.max_lat;
+		var x11 = box2.min_lon,x12 = box2.max_lon,y11 = box2.min_lat,y12=box2.max_lat;
+		var zx = Math.abs(x01+x02 - x11- x12);
+		var x = Math.abs(x01 -x02) + Math.abs(x11-x12);
+		var zy = Math.abs(y01+y02 - y11-y12);
+		var y = Math.abs(y01 - y02) + Math.abs(y11-y12);
+		if(zx <= x && zy <= y){
+			return true
+		}else{
+			return false;
+		}
+	}
+
 	return readLines(model.getPath(), parseLine)
 		.then(function(){
 
@@ -234,6 +328,10 @@ function readObj (model) {
 			model.sendMessage("info","高:" + height);
 			var box_world = model.getBoundingVolume();
 			console.log(box_world);
+
+			// 计算范围轮廓
+			// getBorderGrid();
+			model.getGrid();
 
 
 			return readLines(model.getIFCTypePath(),parseLine_ifcType)

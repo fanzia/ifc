@@ -174,6 +174,9 @@ class Model{
 		var hashmap = new HashMap();
 		this.models.forEach( function(model, index) {
 			var key = model.getKey();
+			if(key == null){
+				return;
+			}
 			var name = model.getName();
 			var refineType = model.getRefineType();
 			// if(refineType)
@@ -262,6 +265,9 @@ class Model{
 
 	sortByArea(){
 		function sort_function (a,b) {
+			if(a == null || b == null){
+				return false;
+			}
 			return b.getArea() - a.getArea();
 		}
 		this.models.sort(sort_function);
@@ -324,13 +330,107 @@ class Model{
 		};
 
 		this.ws.send(JSON.stringify(result));
-
 	}
 
 
 	getIFC(){
 		return this.ifc;
 	}
+
+	// 获取坐标格网
+	getGrid(){
+		var modelBox = this.getBox();
+		var width = modelBox.max_lon-modelBox.min_lon;
+		var height = modelBox.max_lat-modelBox.min_lat;
+		var count = 5;
+		var size = null;
+		if(width> height){
+			size = height/count;
+		}else{
+			size = width/count;
+		}
+		this.gridSize = size;
+		var widthCount = Math.ceil(width/size);
+		var heightCount = Math.ceil(height/size);
+		var models = this.getModels();
+		this.gridHashMap = new HashMap();
+
+		for(var i = 0; i < widthCount;++i){
+			for(var j = 0; j < heightCount;++j){
+				var box = {
+					min_lon : modelBox.min_lon + i*size,
+					max_lon : modelBox.min_lon + (i+1)*size,
+					min_lat : modelBox.min_lat + j*size,
+					max_lat : modelBox.min_lat + (j+1)*size,
+				};
+				var center = {
+					x : modelBox.min_lon + i*size + size/2,
+					y : modelBox.min_lat + j*size + size/2
+				}
+				for(var k = 0; k<models.length;++k){
+					var objectModel = models[k];
+					var objectModelBox = objectModel.getBox();
+					var result = Common.isIntersect(objectModelBox,box);
+					if(result){
+						this.gridHashMap.set(i+"_"+j,true);
+						break;
+					}
+				}
+				if(!(this.gridHashMap.get(i+"_"+j))){
+					this.gridHashMap.set(i+"_"+j,false);
+				}
+				
+			}
+		}
+		console.log(this.gridHashMap);
+
+		for(var i = heightCount-1;i>=0;i--){
+			var str = '';
+			for(var j = 0; j < widthCount;++j){
+				var key = j + "_" + i; 
+				var value = this.gridHashMap.get(key);
+				if(value== true){
+					str += "y" + ",";
+				}else if(value == false){
+					str += "n" + ",";
+				}else{
+					str += "b" + ",";
+				}
+			}
+			console.log(str);
+		}
+	}
+
+	// 根据模型获取格网序列号
+	getModelGridKey(modelName){
+		var objectModel = this.getModel(modelName);
+		if(!objectModel){
+			return null;
+		}
+
+		var center = objectModel.getCenter();
+		var modelBox = objectModel.getBox();
+
+		var box = this.getBox();
+
+		var min_x = Math.ceil((modelBox.min_lon - box.min_lon)/this.gridSize);
+		var min_y = Math.ceil((modelBox.min_lat - box.min_lat)/this.gridSize);
+		var max_x = Math.ceil((modelBox.min_lon - box.min_lon)/this.gridSize);
+		var max_y = Math.ceil((modelBox.min_lat - box.min_lat)/this.gridSize);
+		return {
+			min_x : min_x,
+			min_y : min_y,
+			max_x : max_x,
+			max_y : max_y
+		};
+	}
+
+	// 根据grid获取值
+	getGridValue(x,y){
+		var key = x+ "_"+y;
+		return this.gridHashMap.get(key);
+	}
+
 }
 
 module.exports = Model;

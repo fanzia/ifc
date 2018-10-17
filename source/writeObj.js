@@ -137,6 +137,11 @@ function writeObj (model) {
 
 	function writeItem (typeHashMap,key) {
 		// 创建key文件夹
+		if(key == null){
+			console.log(key);
+			return;
+		}
+		console.log(key);
 		createObjKeyFolder(key);
 		var instanced = model.getInstanced();
 		typeHashMap.forEach( function(list, refineType) {

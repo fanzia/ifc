@@ -122,7 +122,7 @@ function initUploader () {
 	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">0级个数：</div>'
-	    +	'<input type="text" value="20" class="count-0">'
+	    +	'<input type="text" value="10" class="count-0">'
 	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">X向个数：</div>'

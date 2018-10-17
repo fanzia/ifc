@@ -1,6 +1,6 @@
 var subdivideWlm = require("./subdivide/subdivideWlm");
 var subdivideTujian = require("./subdivide/subdivideTujian_1");
-var subdivideShuinuan = require("./subdivide/subdivideShuinuan");
+var subdivideShuinuan = require("./subdivide/subdivideShuinuan_1");
 var subdivideNeizhuangshi = require("./subdivide/subdivideNeizhuangshi");
 var subdivideCommon = require("./subdivide/subdivideCommon");
 var subdivideMuqiang = require("./subdivide/subdivideMuqiang");
@@ -53,18 +53,25 @@ function subdivide (model) {
         models.forEach( function(objectModel, index) {
             var centerWorld = objectModel.getCenterWorld();
             var box = objectModel.getBox();
-            var radius = box.getRadius();
-            json["list"].push({
-                id : objectModel.getName(),
-                center : centerWorld,
-                radius : radius,
-                center_m : objectModel.getCenter(),
-                box : {
-                    x : box.max_lon - box.min_lon,
-                    y : box.max_lat - box.min_lat,
-                    z : box.max_height - box.min_height
-                }
-            });
+            var raidus = null;
+            if(box){
+                radius = box.getRadius();
+                json["list"].push({
+                    id : objectModel.getName(),
+                    center : centerWorld,
+                    radius : radius,
+                    center_m : objectModel.getCenter(),
+                    box : {
+                        x : box.max_lon - box.min_lon,
+                        y : box.max_lat - box.min_lat,
+                        z : box.max_height - box.min_height
+                    }
+                });
+            }else{
+                json["list"].push({
+                    id : objectModel.getName()
+                });
+            }
         }); 
         var outputFolderPath = model.getOutputFolderPath();
         var jsonPath = path.join(outputFolderPath,"positions.json");

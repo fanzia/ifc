@@ -17,7 +17,7 @@ var readIFC = require("./IFC/readIFC");
 module.exports = convert;
 function convert (uuid,options) {
 	console.log(uuid);
-	console.log(options);
+	// console.log(options);
 
 	function getIFCName (uuid) {
 		var folderPath = path.join(process.cwd(),"public/data/upload",uuid);

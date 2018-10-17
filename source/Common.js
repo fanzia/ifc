@@ -97,6 +97,22 @@ class Common{
 			max_height : box.max_height
 		});
 	}
+
+	// 判断是否相交
+	static  isIntersect (box1,box2) {
+		if(box1)
+		var x01 = box1.min_lon,x02 = box1.max_lon,y01 = box1.min_lat,y02=box1.max_lat;
+		var x11 = box2.min_lon,x12 = box2.max_lon,y11 = box2.min_lat,y12=box2.max_lat;
+		var zx = Math.abs(x01+x02 - x11- x12);
+		var x = Math.abs(x01 -x02) + Math.abs(x11-x12);
+		var zy = Math.abs(y01+y02 - y11-y12);
+		var y = Math.abs(y01 - y02) + Math.abs(y11-y12);
+		if(zx <= x && zy <= y){
+			return true
+		}else{
+			return false;
+		}
+	}
 }
 
 // 顶点 v float float float
