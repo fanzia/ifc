@@ -9,9 +9,9 @@ var HashMap = require('hashmap');
 
 module.exports = readObj;
 function readObj (model) {
-	var currentPositions = [];
-	var currentNormals = [];
-	var currentUvs = [];
+	// var currentPositions = [];
+	// var currentNormals = [];
+	// var currentUvs = [];
 	var currentObjectModel = null;
 	var currentFaceCount = 0;
 	var poisitionCount = 0;
@@ -24,7 +24,13 @@ function readObj (model) {
 	var faceUvs = [];
 	var faceNormals = [];
 
-	var lineBuffer = '';
+	var lineBuffer = '';	
+
+	var positions = [];
+	var normals = [];
+	var uvs = [];
+
+
 
 
 	function parseLine (line) {
@@ -40,24 +46,24 @@ function readObj (model) {
 			var name = list[1].trim();
 			if(currentObjectModel){
 				// 已经有赋值的
-				if(currentPositions.length != 0 && currentObjectModel.getPositions().length == 0){
-					currentObjectModel.setPositions(currentPositions,poisitionCount - currentPositions.length);
-					currentPositions = [];
-				}
-				if(currentFaceCount !=0 && currentObjectModel.faceCount == 0){
-					currentObjectModel.setFaceCount(currentFaceCount);
-					currentFaceCount = 0;
-				}
+				// if(currentPositions.length != 0 && currentObjectModel.getPositions().length == 0){
+				// 	currentObjectModel.setPositions(currentPositions,poisitionCount - currentPositions.length);
+				// 	currentPositions = [];
+				// }
+				// if(currentFaceCount !=0 && currentObjectModel.faceCount == 0){
+				// 	currentObjectModel.setFaceCount(currentFaceCount);
+				// 	currentFaceCount = 0;
+				// }
 
-				if(currentNormals.length != 0 && currentObjectModel.getNormals().length == 0){
-					currentObjectModel.setNormals(currentNormals,normalCount - currentNormals.length);
-					currentNormals = [];
-				}
+				// if(currentNormals.length != 0 && currentObjectModel.getNormals().length == 0){
+				// 	currentObjectModel.setNormals(currentNormals,normalCount - currentNormals.length);
+				// 	currentNormals = [];
+				// }
 
-				if(currentUvs.length != 0 && currentObjectModel.getUvs().length == 0){
-					currentObjectModel.setUvs(currentUvs,uvCount - currentUvs.length);
-					currentUvs = [];
-				}
+				// if(currentUvs.length != 0 && currentObjectModel.getUvs().length == 0){
+				// 	currentObjectModel.setUvs(currentUvs,uvCount - currentUvs.length);
+				// 	currentUvs = [];
+				// }
 				if(smoothGroup){
 					// if(smoothGroup.getMaterial() == null && currentMaterial){
 					// 	smoothGroup.setMaterial(currentMaterial);
@@ -66,26 +72,61 @@ function readObj (model) {
 					currentObjectModel.addSmoothGroup(smoothGroup);
 					smoothGroup = null;
 				}
+
+
+				// 根据面赋值坐标
+				var positionsIndexes = currentObjectModel.getPositionsIndexes();
+				var objectModelPositions = getPositionsByIndexes(positionsIndexes);
+
+				currentObjectModel.setPositions(objectModelPositions,positionsIndexes);
+				// console.log(objectModelPositions);
+
+				// 根据面赋值向量
+				var normalsIndexes = currentObjectModel.getNormalsIndexes();
+				var objectModelNormals = getNormalsByIndexes(normalsIndexes);
+				currentObjectModel.setNormals(objectModelNormals,normalsIndexes);
+
+
+				var uvsIndexes = currentObjectModel.getUvsIndexes();
+				var objectModelUvs = getUvsByIndexes(uvsIndexes);
+				currentObjectModel.setUvs(objectModelUvs,uvsIndexes);
+
 			}
 			currentObjectModel = new ObjectModel(name,model.center);
-			if(currentPositions.length != 0 ){
-				currentObjectModel.setPositions(currentPositions,poisitionCount - currentPositions.length);
-				currentPositions = [];
-			}
-			if(currentFaceCount !=0){
-				currentObjectModel.setFaceCount(currentFaceCount);
-				currentFaceCount = 0;
-			}
+			// if(currentPositions.length != 0 ){
+			// 	currentObjectModel.setPositions(currentPositions,poisitionCount - currentPositions.length);
+			// 	currentPositions = [];
+			// }
 
-			if(currentNormals.length != 0){
-				currentObjectModel.setNormals(currentNormals,normalCount - currentNormals.length);
-				currentNormals = [];
-			}
+			// if(currentFaceCount !=0){
+			// 	currentObjectModel.setFaceCount(currentFaceCount);
+			// 	currentFaceCount = 0;
+			// }
 
-			if(currentUvs.length != 0){
-				currentObjectModel.setUvs(currentUvs,uvCount - currentUvs.length);
-				currentUvs = [];
-			}
+			// if(currentNormals.length != 0){
+			// 	currentObjectModel.setNormals(currentNormals,normalCount - currentNormals.length);
+			// 	currentNormals = [];
+			// }
+
+			// if(currentUvs.length != 0){
+			// 	currentObjectModel.setUvs(currentUvs,uvCount - currentUvs.length);
+			// 	currentUvs = [];
+			// }
+			// 根据面赋值坐标
+			var positionsIndexes = currentObjectModel.getPositionsIndexes();
+			var objectModelPositions = getPositionsByIndexes(positionsIndexes);
+			currentObjectModel.setPositions(objectModelPositions,positionsIndexes);
+			// console.log(objectModelPositions);
+
+			// 根据面赋值向量
+			var normalsIndexes = currentObjectModel.getNormalsIndexes();
+			var objectModelNormals = getNormalsByIndexes(normalsIndexes);
+			currentObjectModel.setNormals(objectModelNormals,normalsIndexes);
+
+
+			var uvsIndexes = currentObjectModel.getUvsIndexes();
+			var objectModelUvs = getUvsByIndexes(uvsIndexes);
+			currentObjectModel.setUvs(objectModelUvs,uvsIndexes);
 
 			model.addObjectModel(currentObjectModel);
 
@@ -99,11 +140,13 @@ function readObj (model) {
 				point = new Point(parseFloat(result[1]),parseFloat(result[2]),parseFloat(result[3]));
 			}
 
-			currentPositions.push(point);
+			// currentPositions.push(point);
+			positions.push(point);
 			poisitionCount++;
 		}else if ((result = global.normalPattern.exec(line) ) !== null) {
            	var point = new Point(parseFloat(result[1]),parseFloat(result[2]),parseFloat(result[3]));
-           	currentNormals.push(point);
+           	// currentNormals.push(point);
+           	normals.push(point);
            	normalCount++;
 	    } else if ((result = global.uvPattern.exec(line)) !== null) {
 	    	var z = 0.0;
@@ -111,7 +154,8 @@ function readObj (model) {
 	    		z = parseFloat(result[3]);
 	    	}
 	        var point = new Point(parseFloat(result[1]),parseFloat(result[2]),z);
-	        currentUvs.push(point);
+	        // currentUvs.push(point);
+	        uvs.push(point);
 	        uvCount++;
 		// }else if(line.substring(0, 2) === "f "){
 		// 	currentFaceCount ++;
@@ -136,7 +180,7 @@ function readObj (model) {
 			var number = line.substring(2);
 			smoothGroup.setNumber(number);
 			// smoothGroup.setMaterial(currentMaterial);
-			// smoothGroup.addMaterial(currentMaterial);
+			smoothGroup.addMaterial(currentMaterial);
 		}else{
 			if (line.slice(-1) === '\\') {
 			    lineBuffer += line.substring(0, line.length-1);
@@ -147,12 +191,14 @@ function readObj (model) {
 			if (lineBuffer.substring(0, 2) === 'f ') {
 				currentFaceCount++;
 			    while ((result = facePattern.exec(lineBuffer)) !== null) {
-			        facePositions.push(result[1]);
-			        faceUvs.push(result[2]);
-			        faceNormals.push(result[3]);
+			        facePositions.push(parseInt(result[1]));
+			        faceUvs.push(parseInt(result[2]));
+			        faceNormals.push(parseInt(result[3]));
 			    }
 
 			    var face = new Face(facePositions,faceUvs,faceNormals);
+			    var points = getPositonsByFace();
+
 			    if(smoothGroup){
 			    	smoothGroup.addFace(currentMaterial,face);
 			    }
@@ -166,26 +212,58 @@ function readObj (model) {
 
 	}
 
+	// 根据面来获取用到了哪些点
+	function getPositonsByFace () {
+		
+	}
+
+
+	function getPositionsByIndexes (indexes) {
+		var list = [];
+		for(var i = 0; i< indexes.length;++i){
+			list.push(positions[indexes[i]-1]);
+		}
+		return list;
+	}
+
+
+	function getNormalsByIndexes (indexes) {
+		var list = [];
+		for(var i = 0; i< indexes.length;++i){
+			list.push(normals[indexes[i]-1]);
+		}
+		return list;
+	}
+
+	function getUvsByIndexes (indexes) {
+		var list = [];
+		for(var i = 0; i< indexes.length;++i){
+			list.push(uvs[indexes[i]-1]);
+		}
+		return list;
+	}
+
+
 	// 后处理
 	function afterRead () {
-		if(currentPositions.length != 0 && currentObjectModel.getPositions().length == 0){
-			currentObjectModel.setPositions(currentPositions,poisitionCount - currentPositions.length);
-			currentPositions = [];
-		}
+		// if(currentPositions.length != 0 && currentObjectModel.getPositions().length == 0){
+		// 	currentObjectModel.setPositions(currentPositions,poisitionCount - currentPositions.length);
+		// 	currentPositions = [];
+		// }
 
-		if(currentFaceCount != 0 && currentObjectModel.faceCount == 0){
-			currentObjectModel.setFaceCount(currentFaceCount);
-		}
+		// if(currentFaceCount != 0 && currentObjectModel.faceCount == 0){
+		// 	currentObjectModel.setFaceCount(currentFaceCount);
+		// }
 
-		if(currentNormals.length != 0 && currentObjectModel.getNormals().length == 0){
-			currentObjectModel.setNormals(currentNormals,normalCount - currentNormals.length);
-			currentNormals = [];
-		}
+		// if(currentNormals.length != 0 && currentObjectModel.getNormals().length == 0){
+		// 	currentObjectModel.setNormals(currentNormals,normalCount - currentNormals.length);
+		// 	currentNormals = [];
+		// }
 
-		if(currentUvs.length != 0 && currentObjectModel.getUvs().length == 0){
-			currentObjectModel.setUvs(currentUvs,uvCount - currentUvs.length);
-			currentUvs = [];
-		}
+		// if(currentUvs.length != 0 && currentObjectModel.getUvs().length == 0){
+		// 	currentObjectModel.setUvs(currentUvs,uvCount - currentUvs.length);
+		// 	currentUvs = [];
+		// }
 
 		if(smoothGroup){
 			// if(smoothGroup.getMaterial() == null && currentMaterial){
@@ -195,6 +273,22 @@ function readObj (model) {
 			currentObjectModel.addSmoothGroup(smoothGroup);
 			smoothGroup = null;
 		}
+
+		// 根据面赋值坐标
+		var positionsIndexes = currentObjectModel.getPositionsIndexes();
+		var objectModelPositions = getPositionsByIndexes(positionsIndexes);
+		currentObjectModel.setPositions(objectModelPositions,positionsIndexes);
+		// console.log(objectModelPositions);
+
+		// 根据面赋值向量
+		var normalsIndexes = currentObjectModel.getNormalsIndexes();
+		var objectModelNormals = getNormalsByIndexes(normalsIndexes);
+		currentObjectModel.setNormals(objectModelNormals,normalsIndexes);
+
+
+		var uvsIndexes = currentObjectModel.getUvsIndexes();
+		var objectModelUvs = getUvsByIndexes(uvsIndexes);
+		currentObjectModel.setUvs(objectModelUvs,uvsIndexes);
 	}
 
 
@@ -315,6 +409,9 @@ function readObj (model) {
 
 			afterRead();
 
+			model.setPositions(positions);
+			model.setUvs(uvs);
+			model.setNormals(normals);
 			model.sendMessage("info","读取结束");
 
 			var box = model.getBox();

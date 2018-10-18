@@ -29,6 +29,11 @@ class Model{
 
 		var ifcPath = path.join(process.cwd(),"public/data/upload",uuid ,ifcName);
 		this.ifc = new IFC(ifcPath,uuid);
+
+
+		this.positions = [];
+		this.normals = [];
+		this.uvs = [];
 	}
 
 	getUuid(){
@@ -65,6 +70,31 @@ class Model{
 			this.models.push(objectModel);
 			this.box = null;
 		}
+	}
+
+	// 所有的坐标点
+	setPositions(positions){
+		this.positions = positions;
+	}
+
+	getPositionByIndex(index){
+		return this.positions[index-1];
+	}
+
+	setNormals(normals){
+		this.normals = normals;
+	}
+
+	getNormalByIndex(index){
+		return this.normals[index-1];
+	}
+
+	setUvs(uvs){
+		this.uvs = uvs;
+	}
+
+	getUvByIndex(index){
+		return this.uvs[index-1];
 	}
 
 	// 计算范围

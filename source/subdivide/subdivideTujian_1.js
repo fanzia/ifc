@@ -48,6 +48,16 @@ function subdivideTujian (model) {
 			},
 			"children":[]
 		}
+		if(count0 == 0){
+			json = {
+				"boundingVolume":{
+					"region":box.toArray(),
+				},
+				"geometricError": 1,
+				"children":[]
+			}
+		}
+
 
 		for(var i = 0; i < countX;++i){
 			for(var j = 0; j < countY;++j){

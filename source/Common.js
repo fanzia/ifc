@@ -113,6 +113,17 @@ class Common{
 			return false;
 		}
 	}
+
+
+	static sortByNumber(list){
+		function sort_function (a,b) {
+			if(a == null || b == null){
+				return false;
+			}
+			return parseInt(a) - parseInt(b);
+		}
+		list.sort(sort_function);
+	}
 }
 
 // 顶点 v float float float

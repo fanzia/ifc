@@ -3,6 +3,7 @@ var Promise = require('bluebird');
 var fs = require("fs");
 var path = require('path');
 var fsExtra = require('fs-extra');
+var HashMap = require('hashmap');
 
 module.exports = writeObj;
 
@@ -16,6 +17,10 @@ function writeObj (model) {
 	var currentPositionIndex = 0;
 	var currentUvIndex = 0;
 	var currentNormalIndex = 0;
+
+	var currentPositionHahMap = new HashMap();
+	var currentNormalHashMap = new HashMap();
+	var currentUvHashMap = new HashMap();
 
 
 
@@ -152,9 +157,13 @@ function writeObj (model) {
 					return;
 				}
 				var output = '';
-				currentPositionIndex = 0;
-				currentUvIndex = 0;
-				currentNormalIndex = 0;
+				// currentPositionIndex = 0;
+				// currentUvIndex = 0;
+				// currentNormalIndex = 0;
+
+				currentPositionHahMap.clear();
+				currentNormalHashMap.clear();
+				currentUvHashMap.clear();
 
 				output += `mtllib ../${model.getMtlName()}\n`;
 				for(var i = 0; i < list.length;++i){
@@ -179,16 +188,22 @@ function writeObj (model) {
 
 				if(instanced){
 					//  实例化
-					currentPositionIndex = 0;
-					currentUvIndex = 0;
-					currentNormalIndex = 0;
+					// currentPositionIndex = 0;
+					// currentUvIndex = 0;
+					// currentNormalIndex = 0;
+					currentPositionHahMap.clear();
+					currentNormalHashMap.clear();
+					currentUvHashMap.clear();
 					refineType = refineType.slice(1);
 					writeInstanceModel(key,refineType,list);
 				}else{
 					var output = '';
-					currentPositionIndex = 0;
-					currentUvIndex = 0;
-					currentNormalIndex = 0;
+					// currentPositionIndex = 0;
+					// currentUvIndex = 0;
+					// currentNormalIndex = 0;
+					currentPositionHahMap.clear();
+					currentNormalHashMap.clear();
+					currentUvHashMap.clear();
 
 					output += `mtllib ../${model.getMtlName()}\n`;
 					for(var i = 0; i < list.length;++i){
@@ -390,18 +405,21 @@ function writeObj (model) {
 			return "";
 		}
 		var output = '';
+
 		
 		output += `# object ${objectModel.getName()} \n\n`;
+
+
 
 		if(centerFlag){
 			output += writePositions_center(objectModel);
 		}else{
-			output += writePositions(objectModel.getPositions());
+			output += writePositions(objectModel);
 		}
 		
-		output += writeUvs(objectModel.getUvs());
+		output += writeUvs(objectModel);
 
-		output += writeNormals(objectModel.getNormals());
+		output += writeNormals(objectModel);
 
 		output += writeSmoothGroups(objectModel);
 
@@ -411,12 +429,25 @@ function writeObj (model) {
 	}
 	
 	// v 
-	function writePositions (positions) {
+	function writePositions (objectModel) {
 		var output = '';
-		for(var i = 0; i < positions.length;++i){
-			var point = positions[i];
-			output += `v ${point.getX()} ${point.getZ()}  ${-point.getY()}\n`;
+		var positionsIndexes = objectModel.getPositionsIndexes();
+		for(var i = 0; i < positionsIndexes.length;++i){
+			var index = positionsIndexes[i];
+			var newIndex = currentPositionHahMap.get(index);
+			if(!newIndex){
+				var size = currentPositionHahMap.size;
+				// 之前的index，和后面的index
+				currentPositionHahMap.set(index,size+1);
+				var point = model.getPositionByIndex(index);
+				output += `v ${point.getX()} ${point.getZ()}  ${-point.getY()}\n`;
+			}
 		}
+		// for(var i = 0; i < positions.length;++i){
+		// 	var point = positions[i];
+		// 	output += `v ${point.getX()} ${point.getZ()}  ${-point.getY()}\n`;
+		// }
+		// var 
 
 		return output;
 	}
@@ -424,59 +455,109 @@ function writeObj (model) {
 	// v  移动到中心点
 	function writePositions_center (objectModel) {
 		var output = '';
-		var positions = objectModel.getPositions();
+		// var positions = objectModel.getPositions();
 		var center = objectModel.getCenter();
-		for(var i = 0; i < positions.length;++i){
-			var point = positions[i];
-			output += `v ${point.getX()-center.getX()} ${point.getZ()-center.getZ()}  ${-point.getY()+ center.getY()}\n`;
+		// for(var i = 0; i < positions.length;++i){
+		// 	var point = positions[i];
+		// 	output += `v ${point.getX()-center.getX()} ${point.getZ()-center.getZ()}  ${-point.getY()+ center.getY()}\n`;
+		// }
+		var positionsIndexes = objectModel.getPositionsIndexes();
+		for(var i = 0; i < positionsIndexes.length;++i){
+			var index = positionsIndexes[i];
+			var newIndex = currentPositionHahMap.get(index);
+			if(!newIndex){
+				var size = currentPositionHahMap.size;
+				// 之前的index，和后面的index
+				currentPositionHahMap.set(index,size+1);
+				var point = model.getPositionByIndex(index);
+				output += `v ${point.getX()-center.getX()} ${point.getZ()-center.getZ()}  ${-point.getY()+ center.getY()}\n`;
+			}
 		}
-
 		return output;
 	}
 
 
 	// vt
-	function writeUvs (uvs) {
+	function writeUvs (objectModel) {
 		var output = '';
-		for(var i = 0; i < uvs.length;++i){
-			var point = uvs[i];
-			output += `vt ${point.getX()} ${point.getY()} ${point.getZ()} \n`;
+		// for(var i = 0; i < uvs.length;++i){
+		// 	var point = uvs[i];
+		// 	output += `vt ${point.getX()} ${point.getY()} ${point.getZ()} \n`;
+		// }
+		var output = '';
+		var uvsIndexes = objectModel.getUvsIndexes();
+		for(var i = 0; i < uvsIndexes.length;++i){
+			var index = uvsIndexes[i];
+			var newIndex = currentUvHashMap.get(index);
+			if(!newIndex){
+				var size = currentUvHashMap.size;
+				// 之前的index，和后面的index
+				currentUvHashMap.set(index,size+1);
+				var point = model.getUvByIndex(index);
+				output += `vt ${point.getX()} ${point.getZ()}  ${-point.getY()}\n`;
+			}
 		}
 		return output;
 	}
 	
 	// vn 
-	function writeNormals (normals) {
+	function writeNormals (objectModel) {
 		var output = '';
-		for(var i = 0; i < normals.length;++i){
-			var point = normals[i];
-			output += `vn ${point.getX()} ${point.getY()} ${point.getZ()} \n`;
+		// for(var i = 0; i < normals.length;++i){
+		// 	var point = normals[i];
+		// 	output += `vn ${point.getX()} ${point.getY()} ${point.getZ()} \n`;
+		// }
+
+		var output = '';
+		var normalsIndexes = objectModel.getNormalsIndexes();
+		for(var i = 0; i < normalsIndexes.length;++i){
+			var index = normalsIndexes[i];
+			var newIndex = currentNormalHashMap.get(index);
+			if(!newIndex){
+				var size = currentNormalHashMap.size;
+				// 之前的index，和后面的index
+				currentNormalHashMap.set(index,size+1);
+				var point = model.getNormalByIndex(index);
+				output += `vn ${point.getX()} ${point.getZ()}  ${-point.getY()}\n`;
+			}
 		}
 		return output;
 	}
 
 
 	function writeSmoothGroups (objectModel) {
-		var positionIndex = objectModel.getPositionIndex();
-		var uvIndex = objectModel.getUvIndex();
-		var normalIndex = objectModel.getNormalIndex();
-		var smoothGroups = objectModel.getSmoothGroups();
+		// var positionIndex = objectModel.getPositionIndex();
+		// var uvIndex = objectModel.getUvIndex();
+		// var normalIndex = objectModel.getNormalIndex();
+		// var smoothGroups = objectModel.getSmoothGroups();
+		// var output = '';
+		// output += `g ${objectModel.getName()}\n`;
+		// for(var i = 0; i < smoothGroups.length;++i){
+		// 	var smoothGroup = smoothGroups[i];
+		// 	output += writeSmoothGroup(smoothGroup,positionIndex,uvIndex,normalIndex,objectModel.getPositionCount());
+		// }
+		// currentPositionIndex += objectModel.getPositionCount();
+		// currentNormalIndex +=objectModel.getNormalCount();
+		// currentUvIndex += objectModel.getUvCount();
+
 		var output = '';
+		var smoothGroups = objectModel.getSmoothGroups();
 		output += `g ${objectModel.getName()}\n`;
 		for(var i = 0; i < smoothGroups.length;++i){
 			var smoothGroup = smoothGroups[i];
-			output += writeSmoothGroup(smoothGroup,positionIndex,uvIndex,normalIndex,objectModel.getPositionCount());
+			output += writeSmoothGroup(smoothGroup);
 		}
-		currentPositionIndex += objectModel.getPositionCount();
-		currentNormalIndex +=objectModel.getNormalCount();
-		currentUvIndex += objectModel.getUvCount();
+		// currentPositionIndex += objectModel.getPositionCount();
+		// currentNormalIndex +=objectModel.getNormalCount();
+		// currentUvIndex += objectModel.getUvCount();
+
 
 		return output;
 	}
 
 
 	 // "f v", "f v/v", "f v//v", "f v/v/v"
-	function writeSmoothGroup (smoothGroup,positionIndex,uvIndex,normalIndex,positionCount) {
+	function writeSmoothGroup (smoothGroup) {
 		// var faces = smoothGroup.getFaces();
 		var materialFace = smoothGroup.getMaterialFace();
 		var output = '';
@@ -493,41 +574,43 @@ function writeObj (model) {
 				var uvs = face.getUvs();
 				var normals = face.getNormals();
 
-				if(positionIndex == -1){
+				if(positions.length == 0){
 					console.log('no position');
 					continue;
 				}
 
-				var pIndex = positionIndex - currentPositionIndex ;
-				var uIndex = uvIndex - currentUvIndex;
-				var nIndex = normalIndex - currentNormalIndex;
+				// var pIndex = positionIndex - currentPositionIndex ;
+				// var uIndex = uvIndex - currentUvIndex;
+				// var nIndex = normalIndex - currentNormalIndex;
+
 				output += `f `;
-				if(uvIndex != -1 && normalIndex != -1){
+				if(uvs.length != 0 && normals.length != 0){
 					// "f v/v/v"
 					for(var j = 0; j < 3;++j){
-						output += `${parseInt(positions[j]) - pIndex}/${parseInt(uvs[j]) - uIndex}/${parseInt(normals[j]) - nIndex} `;
+						// output += `${parseInt(positions[j]) - pIndex}/${parseInt(uvs[j]) - uIndex}/${parseInt(normals[j]) - nIndex} `;
+						output += `${currentPositionHahMap.get(positions[j])}/${currentUvHashMap.get(uvs[j])}/${currentNormalHashMap.get(normals[j])}`;
 					}
 
 					output += `\n`;
 
-				}else if(uvIndex == -1 && normalIndex != -1){
+				}else if(uvs.length == 0 && normals.length != 0){
 					// "f v//v"
 					for(var j = 0; j < 3;++j){
-						output += `${parseInt(positions[j]) - pIndex}//${parseInt(normals[j]) - nIndex} `;
+						output += `${currentPositionHahMap.get(positions[j])}//${currentNormalHashMap.get(normals[j])} `;
 					}
 
 					output += `\n`;
-				}else if(uvIndex != -1 && normalIndex == -1){
+				}else if(uvs.length != 0 && normals.length == 0){
 					// "f v/v"
 					for(var j = 0; j < 3;++j){
-						output += `${parseInt(positions[j]) - pIndex}/${parseInt(uvs[j]) - uIndex} `;
+						output += `${currentPositionHahMap.get(positions[j])}/${currentUvHashMap.get(uvs[j])} `;
 					}
 
 					output += `\n`;
-				}else if(uvIndex == -1 && normalIndex == -1){
+				}else if(uvs.length == 0 && normals.length == 0){
 					// "f v"
 					for(var j = 0; j < 3;++j){
-						output += `${parseInt(positions[j]) - pIndex} `;
+						output += `${currentPositionHahMap.get(positions[j])} `;
 					}
 					output += `\n`;
 				}

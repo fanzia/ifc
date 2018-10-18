@@ -23,13 +23,17 @@ class ObjectModel{
 		this.modelCenter = modelCenter;
 		this.positions = [];
 		this.faceCount = 0;
-		this.positionIndex = -1;
+		// this.positionIndex = -1;
+		this.positionsIndexes = [];
 
 		this.normals = [];
-		this.normalIndex = -1;
+		// this.normalIndex = -1;
+		this.normalsIndexes = [];
 
 		this.uvs = [];
-		this.uvIndex = -1;
+		// this.uvIndex = -1;
+		this.uvsIndexes = [];
+
 
 		this.smoothGroups = [];
 		this.ifcType = "none";
@@ -52,11 +56,18 @@ class ObjectModel{
 		return this.name;
 	}
 
-	setPositions(positions,index){
+	// setPositions(positions,index){
+	// 	this.positions = positions;
+	// 	this.positionIndex = index;
+	// 	this.calculate();
+	// }
+
+	setPositions(positions,positionsIndexes){
 		this.positions = positions;
-		this.positionIndex = index;
+		this.positionsIndexes = positionsIndexes;
 		this.calculate();
 	}
+
 
 	getPositions(){
 		return this.positions;
@@ -70,9 +81,9 @@ class ObjectModel{
 		return this.positions.length;
 	}
 
-	setNormals(normals,index){
+	setNormals(normals,normalsIndexes){
 		this.normals = normals;
-		this.normalIndex = index;
+		this.normalsIndexes = normalsIndexes;
 	}
 
 	getNormals(){
@@ -115,6 +126,54 @@ class ObjectModel{
 
 	setFaceCount(count){
 		this.faceCount = count;
+	}
+
+
+	getPositionsIndexes(){
+		if(this.positionsIndexes.length != 0){
+			return this.positionsIndexes;
+		}
+		var s = null;
+		var list = [];
+		for(var i = 0; i < this.smoothGroups.length;++i){
+			s = this.smoothGroups[i];
+			var indexes = s.getPositionsIndexs();
+			for(var j = 0; j < indexes.length;++j){
+				if(list.indexOf(indexes[j]) == -1){
+					list.push(indexes[j]);
+				}
+			}
+		}
+		Common.sortByNumber(list);
+		return list;
+	}
+
+
+	getNormalsIndexes(){
+		var list = [];
+		for(var i = 0; i < this.smoothGroups.length;++i){
+			var indexes = this.smoothGroups[i].getNormalsIndexes();
+			for(var j = 0; j < indexes.length;++j){
+				if(list.indexOf(indexes[j]) == -1){
+					list.push(indexes[j]);
+				}
+			}
+		}
+		return list;
+	}
+
+
+	getUvsIndexes(){
+		var list = [];
+		for(var i = 0; i < this.smoothGroups.length;++i){
+			var indexes = this.smoothGroups[i].getUvsIndexes();
+			for(var j = 0; j < indexes.length;++j){
+				if(list.indexOf(indexes[j]) == -1){
+					list.push(indexes[j]);
+				}
+			}
+		}
+		return list;
 	}
 
 	getCenter(){
