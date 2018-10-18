@@ -18,6 +18,11 @@ function addEvent () {
 		$(".popup").hide();
 		$("#list ul li").removeClass('active');
 	});
+
+
+	$(".refresh-tiles").click(function(event) {
+		getList();
+	});
 }
 
 function addMoveEvent () {
@@ -107,6 +112,7 @@ function showMap () {
 }
 
 function getList () {
+	$("#left #list").empty();
 	$.ajax({
 		url: '/getList',
 		type: 'get',
@@ -151,13 +157,16 @@ function showList (json) {
 			html += `<li uuid='${uuid}'>
 			<div class='ifc-name'>${ifc}</div>
 			<div class='ifc-time'>${date}</div>
-			<div class='ifc-tool'><button>显示</button></div>
+			<div class='ifc-tool'>
+			<button class='btn-remove'>删除</button>
+			<button class='btn-show'>显示</button></div>
 			<div class='clear'></div>
 			</li>`;
 		}else{
 			html += `<li uuid='${uuid}'>
 				<div class='ifc-name'>${ifc}</div>
-				<div class='ifc-tool'><button disabled>显示</button></div>
+				<div class='ifc-tool'>
+				<button class='btn-remove'>删除</button><button disabled>显示</button></div>
 				<div class='clear'></div>
 				</li>`;
 		}
@@ -168,10 +177,17 @@ function showList (json) {
 
 	$("#left #list").html(html);
 
-	$("#list .ifc-tool button").click(function (e) {
+	$("#list .ifc-tool button.btn-show").click(function (e) {
 		e.preventDefault();
 		var uuid = $(this).parents("li").attr("uuid");
 		show3dtiles(uuid);
+		return false;
+	})
+
+	$("#list .ifc-tool button.btn-remove").click(function (e) {
+		e.preventDefault();
+		var uuid = $(this).parents("li").attr("uuid");
+		remove3dtiles(uuid);
 		return false;
 	})
 
@@ -239,6 +255,32 @@ function getInfo (uuid) {
 	
 }
 
+
+function remove3dtiles (uuid) {
+	$(".popup").hide();
+	$.ajax({
+		url:`/remove/${uuid}`,
+		type: 'get',
+		dataType: 'text',
+	})
+	.done(function(result) {
+		console.log(result);
+
+		var json = JSON.parse(result);
+		if(json.info == "success"){
+			alert("删除成功");
+			getList();
+		}else{
+			alert("删除失败");
+		}
+		
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+	});
+}
 function showInfo (json) {
 	if(json["error"]){
 		console.log(json);

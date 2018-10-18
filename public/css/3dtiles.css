@@ -29,7 +29,7 @@ html,body{
     width: 94px;
     height: 41px;
     overflow: hidden;
-    display: block;
+    display: inline-block;
     background-color: #2fe8d7;
     border: none;
     border-radius: 4px;
@@ -79,16 +79,16 @@ html,body{
 }
 
 #list ul li .ifc-name{
-	width: 280px;
+	width: 220px;
 	float: left;
-	    text-overflow: ellipsis;
+	text-overflow: ellipsis;
     white-space: nowrap;
     word-break: break-all;
     overflow: hidden;
 }
 
 #list ul li .ifc-tool{
-	width: 40px;
+	/*width: 40px;*/
 	float: right;
 }
 

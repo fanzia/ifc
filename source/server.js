@@ -12,6 +12,7 @@ var bodyParser = require('body-parser');
 var convert = require("./convert");
 var getList = require("./service/getList");
 var getInfo = require("./service/getInfo");
+var remove = require("./service/remove");
 
 
 
@@ -274,8 +275,19 @@ app.get('/getInfo/:uuid',function (req,res) {
     res.send(JSON.stringify(json));
 })
 
+
+app.get('/remove/:uuid',function (req,res) {
+    var uuid = req.params.uuid;
+    remove(uuid)
+        .then(function (json) {
+            res.send(JSON.stringify(json));
+        });
+    
+})
 var server = app.listen(8081, function () {
     var host = server.address().address
     var port = server.address().port
   console.log("访问地址为 http://%s:%s", host, port)
 });
+
+
