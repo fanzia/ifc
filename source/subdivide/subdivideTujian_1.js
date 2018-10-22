@@ -116,7 +116,7 @@ function subdivideTujian (model) {
 			}
 			var ifcType = objectModel.getIFCType();
 			
-			if(!box.isPointIn(centerWorld) || objectModel.getKey() != null
+			if(!box.isPointIn(centerWorld) || objectModel.getKeys().length != 0
 				|| (ifcType != "IfcSlab" && ifcType != "IfcWall"
 				&& ifcType != "IfcWallStandardCase")){
 				continue;
@@ -269,7 +269,7 @@ function subdivideTujian (model) {
 		for(var i = 0; i < models.length;++i){
 			var objectModel = models[i];
 			var centerWorld = objectModel.getCenterWorld();
-			if(!box.isPointIn(centerWorld) || objectModel.getKey()!= null )
+			if(!box.isPointIn(centerWorld) || objectModel.getKeys().length!= 0 )
 				continue;
 			count++;
 			objectModel.setParam(level,x,y,h);

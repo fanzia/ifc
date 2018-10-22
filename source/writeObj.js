@@ -5,6 +5,8 @@ var path = require('path');
 var fsExtra = require('fs-extra');
 var HashMap = require('hashmap');
 
+var ObjectModel = require("./Model/ObjectModel");
+
 module.exports = writeObj;
 
 // writeObj(null);
@@ -107,45 +109,74 @@ function writeObj (model) {
 		}
 	}
 
+	function writeObjToOne (typeHashMap,key) {
 
-	// function writeItem(lodList) {
-	// 	lodList.forEach( function(value, key) {
-	// 		currentName = key;
-	// 		currentList = value;
-	// 		var output = '';
-	// 		currentPositionIndex = 0;
-	// 		currentUvIndex = 0;
-	// 		currentNormalIndex = 0;
-
-	// 		output += `mtllib ${model.getMtlName()}\n`;
-	// 		for(var i = 0; i < currentList.length;++i){
-	// 			var id = currentList[i];
-	// 			var objectModel = model.getModel(id);
-	// 			if(objectModel == null){
-	// 				continue;
-	// 			}
-	// 			output += writeObjectModel(objectModel);
-	// 		}
+		// var list = ["23VptkXWPAB9Kc6fJCaMb4","23VptkXWPAB9Kc6fJCaMb2"];
+		// var list = ["23VptkXWPAB9Kc6fJCaMiv","23VptkXWPAB9Kc6fJCaMb4"];
+		
+		// combineModels(list,key);
+		// var objectModel = combineModels(list);
+		var combineList = [];
+		typeHashMap.forEach( function(list, refineType) {
+			// 不管哪种类型都合并到一起
+			combineList = combineList.concat(list);
+		});
+		combineModels(combineList,key);
+	}
 
 
-	// 		var outputFolderPath = model.getOutputFolderPath();
-	// 		var objName = path.join(outputFolderPath,"objs",currentName+".obj");
-	// 		try {
-	// 			fs.writeFileSync(objName,output,"utf8");
-	// 			model.sendMessage("info",`写入${currentName}成功`);
-	// 		} catch(err) {
-	// 			model.sendMessage("info",`写入${currentName}失败:${err}`);
-	// 		}
-	// 	});
-	// }
+	function combineModels (list,key) {
+		var combineObjectModel = new ObjectModel(key,model.getCenter());
 
+		currentPositionHahMap.clear();
+		currentNormalHashMap.clear();
+		currentUvHashMap.clear();
+		var combineSmoothGroups = combineObjectModel.getSmoothGroups();
+		for(var i = 0; i < list.length;++i){
+			var name = list[i];
+			var objectModel = model.getModel(name);
+			var smoothGroups = objectModel.getSmoothGroups();
+			for(var j = 0; j < smoothGroups.length;++j){
+				var smoothGroup = smoothGroups[j];
+				// var number = smoothGroup.getNumber();
+				smoothGroup.setNumber(combineSmoothGroups.length+1);
+				combineObjectModel.addSmoothGroup(smoothGroup);
+
+			}
+
+		}
+
+		var positionsIndexes = combineObjectModel.getPositionsIndexes();
+		var normalsIndexes = combineObjectModel.getNormalsIndexes();
+		var uvsIndexes = combineObjectModel.getUvsIndexes();
+		var output = `mtllib ../${model.getMtlName()}\n`;
+		output += writeObjectModel(combineObjectModel,false);
+		var outputFolderPath = model.getOutputFolderPath();
+		var objName = path.join(outputFolderPath,"objs", key,"b3dm.obj");
+		try{
+			fs.writeFileSync(objName,output,"utf8");
+			model.sendMessage("info",`写入${key}成功`);
+		} catch(err) {
+			model.sendMessage("info",`写入${key}失败:${err}`);
+		}
+
+
+	}
 
 	function writeItem (typeHashMap,key) {
+
+
 		// 创建key文件夹
 		if(key == null){
 			console.log(key);
 			return;
 		}
+
+		// if(key.indexOf("1") == 0){
+		// 	createObjKeyFolder(key);
+		// 	writeObjToOne(typeHashMap,key);
+		// 	return;
+		// }
 		console.log(key);
 		createObjKeyFolder(key);
 		var instanced = model.getInstanced();
@@ -156,11 +187,9 @@ function writeObj (model) {
 				if(list.length == 0){
 					return;
 				}
-				var output = '';
-				// currentPositionIndex = 0;
-				// currentUvIndex = 0;
-				// currentNormalIndex = 0;
 
+				// combineModels(list,key);
+				var output = '';
 				currentPositionHahMap.clear();
 				currentNormalHashMap.clear();
 				currentUvHashMap.clear();
@@ -188,9 +217,6 @@ function writeObj (model) {
 
 				if(instanced){
 					//  实例化
-					// currentPositionIndex = 0;
-					// currentUvIndex = 0;
-					// currentNormalIndex = 0;
 					currentPositionHahMap.clear();
 					currentNormalHashMap.clear();
 					currentUvHashMap.clear();
@@ -198,9 +224,6 @@ function writeObj (model) {
 					writeInstanceModel(key,refineType,list);
 				}else{
 					var output = '';
-					// currentPositionIndex = 0;
-					// currentUvIndex = 0;
-					// currentNormalIndex = 0;
 					currentPositionHahMap.clear();
 					currentNormalHashMap.clear();
 					currentUvHashMap.clear();
@@ -240,7 +263,6 @@ function writeObj (model) {
 	function writeInstanceObj (key,refineType,list) {
 		var first = list[0];
 		var objectModel = model.getModel(first);
-		// var refineType = objectModel.getRefineType();
 
 		// 输出obj
 		var output = `mtllib ../${model.getMtlName()}\n`;
@@ -249,9 +271,9 @@ function writeObj (model) {
 		var objName = path.join(outputFolderPath,"objs",key,refineType+".obj");
 		try{
 			fs.writeFileSync(objName,output,"utf8");
-			model.sendMessage("info",`写入${currentName}成功`);
+			model.sendMessage("info",`写入${key}成功`);
 		} catch(err) {
-			model.sendMessage("info",`写入${currentName}失败:${err}`);
+			model.sendMessage("info",`写入${key}失败:${err}`);
 		}
 	}
 

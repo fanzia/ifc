@@ -426,9 +426,9 @@ function readObj (model) {
 			var box_world = model.getBoundingVolume();
 			console.log(box_world);
 
-			// 计算范围轮廓
+			// 计算范围轮廓,暂时不计算了
 			// getBorderGrid();
-			model.getGrid();
+			// model.getGrid();
 
 
 			return readLines(model.getIFCTypePath(),parseLine_ifcType)

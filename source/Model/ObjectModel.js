@@ -38,11 +38,13 @@ class ObjectModel{
 		this.smoothGroups = [];
 		this.ifcType = "none";
 
-		this.x = null;
-		this.y = null;
-		this.h = null;
-		this.level = null;
-		this.key = null;
+		// this.x = null;
+		// this.y = null;
+		// this.h = null;
+		// this.level = null;
+		// this.key = null;
+
+		this.keys = [];
 
 		this.refineType = null;
 		this.geomType = null;
@@ -150,6 +152,9 @@ class ObjectModel{
 
 
 	getNormalsIndexes(){
+		if(this.normalsIndexes.length != 0){
+			return this.normalsIndexes;
+		}
 		var list = [];
 		for(var i = 0; i < this.smoothGroups.length;++i){
 			var indexes = this.smoothGroups[i].getNormalsIndexes();
@@ -159,11 +164,15 @@ class ObjectModel{
 				}
 			}
 		}
+		Common.sortByNumber(list);
 		return list;
 	}
 
 
 	getUvsIndexes(){
+		if(this.uvsIndexes.length != 0){
+			return this.uvsIndexes;
+		}
 		var list = [];
 		for(var i = 0; i < this.smoothGroups.length;++i){
 			var indexes = this.smoothGroups[i].getUvsIndexes();
@@ -173,6 +182,7 @@ class ObjectModel{
 				}
 			}
 		}
+		Common.sortByNumber(list);
 		return list;
 	}
 
@@ -221,18 +231,33 @@ class ObjectModel{
 		return this.box;
 	}
 
+	// setParam(level,x,y,h){
+	// 	this.level = level;
+	// 	this.x = x;
+	// 	this.y = y;
+	// 	this.h = h;
+
+	// 	// this.key = `${level}_${x}_${y}_${h}`;
+	// 	this.key = `${level}_${h}_${x}_${y}`;
+	// }
+
 	setParam(level,x,y,h){
-		this.level = level;
-		this.x = x;
-		this.y = y;
-		this.h = h;
+		// this.level = level;
+		// this.x = x;
+		// this.y = y;
+		// this.h = h;
 
 		// this.key = `${level}_${x}_${y}_${h}`;
-		this.key = `${level}_${h}_${x}_${y}`;
+
+		this.keys.push(`${level}_${h}_${x}_${y}`);
 	}
 
-	getKey(){
-		return this.key;
+	// getKey(){
+	// 	return this.key;
+	// }
+
+	getKeys(){
+		return this.keys;
 	}
 
 	// 实例化类型

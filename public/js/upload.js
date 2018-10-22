@@ -120,17 +120,17 @@ function initUploader () {
 	    +	'	<option value="neizhuangshi">内装饰</option>'
 	    +	'</select>'
 	    +	'</div>'
-	    +	'<div class="file-item" >'
-	    +	'<div class="label">0级个数：</div>'
-	    +	'<input type="text" value="10" class="count-0">'
-	    +	'</div>'
+	    // +	'<div class="file-item" >'
+	    // +	'<div class="label">0级个数：</div>'
+	    // +	'<input type="text" value="0" class="count-0">'
+	    // +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">X向个数：</div>'
 	    +	'<input type="text" value="4" class="count-x">'
 	    +	'</div>'
 	   	+	'<div class="file-item" >'
 	    +	'<div class="label">Y向个数：</div>'
-	    +	'<input type="text" value="4" class="count-y">'
+	    +	'<input type="text" value="2" class="count-y">'
 	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">Z向个数：</div>'
@@ -223,7 +223,8 @@ function beginConvert () {
 	// 	return;
 	// }
 
-	var count_0 = $(".count-0").val();
+	// var count_0 = $(".count-0").val();
+	var count_0 = 0;
 	var count_x = $('.count-x').val();
 	var count_y = $(".count-y").val();
 	var count_z = $(".count-z").val(); 

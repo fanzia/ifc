@@ -200,51 +200,122 @@ class Model{
 
 	// 加上实例化
 	// hashmap<key,hashmap<type,list>>
+	// getLodList_2(hashmap){
+	// 	var hashmap = new HashMap();
+	// 	this.models.forEach( function(model, index) {
+	// 		var key = model.getKey();
+	// 		if(key == null){
+	// 			return;
+	// 		}
+	// 		var name = model.getName();
+	// 		var refineType = model.getRefineType();
+	// 		// if(refineType)
+	// 		if(hashmap.get(key)){
+	// 			var typeHashMap = hashmap.get(key);
+	// 			if(refineType){
+	// 				var list = typeHashMap.get(refineType);
+	// 				if(list){
+	// 					list.push(name);
+	// 				}else{
+	// 					typeHashMap.set(refineType,[name]);
+	// 				}
+	// 			}else{
+	// 				var list = typeHashMap.get("b3dm");
+	// 				if(list){
+	// 					list.push(name);
+	// 				}else{
+	// 					typeHashMap.set("b3dm",[name]);
+	// 				}
+	// 			}
+	// 		}else{
+	// 			var typeHashMap = new HashMap();
+	// 			if(refineType){
+	// 				var list = typeHashMap.get(refineType);
+	// 				if(list){
+	// 					list.push(name);
+	// 				}else{
+	// 					typeHashMap.set(refineType,[name]);
+	// 				}
+	// 			}else{
+	// 				var list = typeHashMap.get("b3dm");
+	// 				if(list){
+	// 					list.push(name);
+	// 				}else{
+	// 					typeHashMap.set("b3dm",[name]);
+	// 				}
+	// 			}
+	// 			hashmap.set(key,typeHashMap);
+	// 		}
+
+	// 	})
+
+
+	// 	hashmap.forEach( function(typeHashMap, key) {
+	// 		var b3dmList = typeHashMap.get("b3dm");
+	// 		if(!b3dmList){
+	// 			typeHashMap.set("b3dm",[]);
+	// 		}
+	// 		b3dmList = typeHashMap.get("b3dm");
+	// 		typeHashMap.forEach( function(list, refineType) {
+
+	// 			if(refineType != "b3dm"&& list.length == 1){
+	// 				b3dmList.push(list[0]);
+	// 				typeHashMap.delete(refineType);
+	// 			}
+	// 		});
+	// 	});
+	// 	return hashmap;
+	// }
+
+
 	getLodList_2(hashmap){
 		var hashmap = new HashMap();
 		this.models.forEach( function(model, index) {
-			var key = model.getKey();
-			if(key == null){
+			var keys = model.getKeys();
+			if(keys == null){
 				return;
 			}
-			var name = model.getName();
-			var refineType = model.getRefineType();
-			// if(refineType)
-			if(hashmap.get(key)){
-				var typeHashMap = hashmap.get(key);
-				if(refineType){
-					var list = typeHashMap.get(refineType);
-					if(list){
-						list.push(name);
+			for(var i = 0; i < keys.length;++i){
+				var key = keys[i];
+				var name = model.getName();
+				var refineType = model.getRefineType();
+				// if(refineType)
+				if(hashmap.get(key)){
+					var typeHashMap = hashmap.get(key);
+					if(refineType){
+						var list = typeHashMap.get(refineType);
+						if(list){
+							list.push(name);
+						}else{
+							typeHashMap.set(refineType,[name]);
+						}
 					}else{
-						typeHashMap.set(refineType,[name]);
+						var list = typeHashMap.get("b3dm");
+						if(list){
+							list.push(name);
+						}else{
+							typeHashMap.set("b3dm",[name]);
+						}
 					}
 				}else{
-					var list = typeHashMap.get("b3dm");
-					if(list){
-						list.push(name);
+					var typeHashMap = new HashMap();
+					if(refineType){
+						var list = typeHashMap.get(refineType);
+						if(list){
+							list.push(name);
+						}else{
+							typeHashMap.set(refineType,[name]);
+						}
 					}else{
-						typeHashMap.set("b3dm",[name]);
+						var list = typeHashMap.get("b3dm");
+						if(list){
+							list.push(name);
+						}else{
+							typeHashMap.set("b3dm",[name]);
+						}
 					}
+					hashmap.set(key,typeHashMap);
 				}
-			}else{
-				var typeHashMap = new HashMap();
-				if(refineType){
-					var list = typeHashMap.get(refineType);
-					if(list){
-						list.push(name);
-					}else{
-						typeHashMap.set(refineType,[name]);
-					}
-				}else{
-					var list = typeHashMap.get("b3dm");
-					if(list){
-						list.push(name);
-					}else{
-						typeHashMap.set("b3dm",[name]);
-					}
-				}
-				hashmap.set(key,typeHashMap);
 			}
 
 		})
