@@ -29,7 +29,45 @@ function readIFC (model) {
 		var value = list[1].trim();
 		hashmap.set(key,value);
 
+		// var ifcKey = value.slice(0,value.indexOf("("));
+		
+		// if(ifcKey == "IFCRELDEFINESBYTYPE"){
+		// 	var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+		// 	var valueList = ifcInfo.split(",");
+		// 	var typeListStr = ifcInfo.slice(ifcInfo.lastIndexOf("(")+1,ifcInfo.lastIndexOf(")"))
+		// 	var typeID = valueList[valueList.length -1];
+		// 	var typeList = typeListStr.split(",");
+		// 	typeHashMap.set(typeID,typeList);
+		// 	// 查找每一个id model.getObjecetModel(),赋予defineType
+		// 	checkTypeList(typeID,typeList);
+		// }else if(ifcKey == "IFCRELSPACEBOUNDARY"){
+		// 	var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+		// 	var valueList = ifcInfo.split(",");
+		// 	var spaceID = valueList[4];
+		// 	var wallID = valueList[5];
+		// 	checkSpaceBoundary(spaceID,wallID);
+		// }else if(ifcKey == "IFCRELAGGREGATES"){
+		// 	var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+		// 	var valueList = ifcInfo.split(",");
+		// 	var key = valueList[4];
+		// 	// var list = valueList[5];
+		// 	var list = ifcInfo.slice(ifcInfo.lastIndexOf("(")+1,ifcInfo.lastIndexOf(")")).split(",");
+		// 	aggregatesHashMap.set(key,list);
+		// }
+	}
+
+	// 第二遍读取
+	function parseLine_2 (line) {
+		line = line.trim();
+		if((line.charAt(0) != '#')){
+			return;
+		}
+		var list = line.split("=");
+
+		var key = list[0].trim();
+		var value = list[1].trim();
 		var ifcKey = value.slice(0,value.indexOf("("));
+		
 		
 		if(ifcKey == "IFCRELDEFINESBYTYPE"){
 			var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
@@ -89,7 +127,7 @@ function readIFC (model) {
 		var id_objectModel = strList[0];
 		id_objectModel = id_objectModel.replace(/'/g,'');
 
-		if(id_objectModel == "0mPrWLfiP6teKEF41l_UTI"){
+		if(id_objectModel == "0vctpRLVD2ngqADF_wL3TZ"){
 			console.log('调试');
 		}
 
@@ -466,16 +504,19 @@ function readIFC (model) {
 
 	return readLines(ifc.getIFCPath(),parseLine)
 		.then(function(){
-			// 解析结束，开始替换curtainwall幕墙集合
-			checkCurtainWall();
+			return readLines(ifc.getIFCPath(),parseLine_2)
+				.then(function () {
+					// 解析结束，开始替换curtainwall幕墙集合
+					checkCurtainWall();
 
-			getSpaceList();
+					getSpaceList();
 
-			return new Promise(function(resolve){
-				return resolve({
-					model : model
-				});
-			});
+					return new Promise(function(resolve){
+						return resolve({
+							model : model
+						});
+					});
+				})
 		});
 
 }

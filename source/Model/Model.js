@@ -20,6 +20,7 @@ class Model{
 		this.countZ = defaultValue(options.count_z,1);
 		this.instanced = defaultValue(options.instanced,true);
 		this.modelName = defaultValue(options.modelName,ifcName);
+		this.wallDelta = defaultValue(parseInt(options.wallDelta),7);
 		this.models = [];
 		this.box = null;
 		this.ws = defaultValue(options.ws,null);
@@ -62,6 +63,10 @@ class Model{
 
 	getInstanced(){
 		return this.instanced;
+	}
+
+	getWallDelta(){
+		return this.wallDelta;
 	}
 
 	// 加载一个模型
@@ -441,32 +446,38 @@ class Model{
 	// 获取坐标格网
 	getGrid(){
 		var modelBox = this.getBox();
+		this.gridSize = 1;
+
 		var width = modelBox.max_lon-modelBox.min_lon;
 		var height = modelBox.max_lat-modelBox.min_lat;
-		var count = 5;
-		var size = null;
-		if(width> height){
-			size = height/count;
-		}else{
-			size = width/count;
-		}
-		this.gridSize = size;
-		var widthCount = Math.ceil(width/size);
-		var heightCount = Math.ceil(height/size);
+
+		// var count = 5;
+		// var size = null;
+		// if(width> height){
+		// 	size = height/count;
+		// }else{
+		// 	size = width/count;
+		// }
+		// this.gridSize = size;
+		// var widthCount = Math.ceil(width/size);
+		// var heightCount = Math.ceil(height/size);
+		var widthCount = Math.ceil(width/this.gridSize);
+		var heightCount = Math.ceil(height/this.gridSize);
+
 		var models = this.getModels();
 		this.gridHashMap = new HashMap();
 
 		for(var i = 0; i < widthCount;++i){
 			for(var j = 0; j < heightCount;++j){
 				var box = {
-					min_lon : modelBox.min_lon + i*size,
-					max_lon : modelBox.min_lon + (i+1)*size,
-					min_lat : modelBox.min_lat + j*size,
-					max_lat : modelBox.min_lat + (j+1)*size,
+					min_lon : modelBox.min_lon + i*this.gridSize,
+					max_lon : modelBox.min_lon + (i+1)*this.gridSize,
+					min_lat : modelBox.min_lat + j*this.gridSize,
+					max_lat : modelBox.min_lat + (j+1)*this.gridSize,
 				};
 				var center = {
-					x : modelBox.min_lon + i*size + size/2,
-					y : modelBox.min_lat + j*size + size/2
+					x : modelBox.min_lon + i*this.gridSize + this.gridSize/2,
+					y : modelBox.min_lat + j*this.gridSize + this.gridSize/2
 				}
 				for(var k = 0; k<models.length;++k){
 					var objectModel = models[k];
@@ -514,16 +525,23 @@ class Model{
 
 		var box = this.getBox();
 
-		var min_x = Math.ceil((modelBox.min_lon - box.min_lon)/this.gridSize);
-		var min_y = Math.ceil((modelBox.min_lat - box.min_lat)/this.gridSize);
-		var max_x = Math.ceil((modelBox.min_lon - box.min_lon)/this.gridSize);
-		var max_y = Math.ceil((modelBox.min_lat - box.min_lat)/this.gridSize);
+		var min_x = Math.floor((modelBox.min_lon - box.min_lon)/this.gridSize);
+		var min_y = Math.floor((modelBox.min_lat - box.min_lat)/this.gridSize);
+		var max_x = Math.floor((modelBox.min_lon - box.min_lon)/this.gridSize);
+		var max_y = Math.floor((modelBox.min_lat - box.min_lat)/this.gridSize);
 		return {
 			min_x : min_x,
 			min_y : min_y,
 			max_x : max_x,
 			max_y : max_y
 		};
+
+		// var grid_x = Math.floor((center.getX() - box.min_lon)/this.gridSize);
+		// var grid_y = Math.floor((center.getY() - box.min_lat)/this.gridSize);
+		// return{
+		// 	x : grid_x,
+		// 	y : grid_y
+		// };
 	}
 
 	// 根据grid获取值

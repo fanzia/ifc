@@ -136,6 +136,10 @@ function initUploader () {
 	    +	'<div class="label">Z向个数：</div>'
 	    +	'<input type="text" value="1" class="count-z">'
 	    +	'</div>'
+	    +	'<div class="file-item" >'
+	    +	'<div class="label">外墙面误差：</div>'
+	    +	'<input type="text" value="7" class="wall-delta">'
+	    +	'</div>'
 	    list.html(html);
 	    file_uuid = null;
 	});
@@ -184,11 +188,11 @@ function initUploader () {
 	});
 }
 
-function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,callback) {
+function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,callback) {
 	$.ajax({
 		type:"get",
 		url : "/model/" + filename + "/" + lon + "/" + lat + "/" + type+ "/" + count_0 + "/" + count_x + "/" + count_y + "/" + count_z
-			+ "/"+ instanced +"/" + modelName,
+			+ "/"+ instanced +"/" + modelName + "/"+wallDelta,
 		dataType : "text",
 		success:function(result){
 			console.log(result);
@@ -229,12 +233,13 @@ function beginConvert () {
 	var count_y = $(".count-y").val();
 	var count_z = $(".count-z").val(); 
 	var type = $(".ifc-type").val();
+	var wallDelta = $(".wall-delta").val();
 
 	var instanced = $(".instanced").val();
 	var modelName = $(".model-name").val();
 
 	date = new Date();
-	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,
+	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,
 		function(result){
 		showMessage(result);
 		result = JSON.parse(result);
@@ -311,6 +316,7 @@ function showCesium (uuid) {
 	tileset.readyPromise.then(function(tileset) {
 	    viewer.camera.viewBoundingSphere(tileset.boundingSphere, new Cesium.HeadingPitchRange(0, -0.5, 0));
 	     viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+	    // viewer.zoomTo(tileset,new Cesium.HeadingPitchRange(0.5,-0.2,tileset.boundingSphere.radius*4.0));
 	})
 
 

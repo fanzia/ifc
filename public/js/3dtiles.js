@@ -301,6 +301,7 @@ function showInfo (json) {
 	var box = json.box;
 	var modelName = json.modelName;
 	var instanced = json.instanced;
+	var wallDelta = json.wallDelta;
 
 	instanced = instanced?"是":"否";
 
@@ -367,7 +368,12 @@ function showInfo (json) {
 						</span>
 					</div>
 					${getBoxInfo(box)}
-
+					<div class='item'>
+						<span class='info-item'>外墙面:</span>
+						<span class='info-name'>
+							<span class='info-name'>${(wallDelta)?wallDelta:""}</span>
+						</span>
+					</div>
 				</div>`;
 
 	$(".popup .main").html(html);

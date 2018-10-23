@@ -428,8 +428,10 @@ function readObj (model) {
 
 			// 计算范围轮廓,暂时不计算了
 			// getBorderGrid();
-			// model.getGrid();
-
+			if(model.getType() == "tujian"){
+				model.getGrid();
+			}
+			
 
 			return readLines(model.getIFCTypePath(),parseLine_ifcType)
 				.then(function(){

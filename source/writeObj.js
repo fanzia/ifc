@@ -172,11 +172,11 @@ function writeObj (model) {
 			return;
 		}
 
-		// if(key.indexOf("1") == 0){
-		// 	createObjKeyFolder(key);
-		// 	writeObjToOne(typeHashMap,key);
-		// 	return;
-		// }
+		if(key.indexOf("0") == 0){
+			createObjKeyFolder(key);
+			writeObjToOne(typeHashMap,key);
+			return;
+		}
 		console.log(key);
 		createObjKeyFolder(key);
 		var instanced = model.getInstanced();

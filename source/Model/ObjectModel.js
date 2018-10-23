@@ -52,6 +52,8 @@ class ObjectModel{
 
 		// 所属的space空间，可能属于多个
 		this.spaceIDs = [];
+
+		this.wallInternal = false;
 	}
 
 	getName(){
@@ -287,6 +289,17 @@ class ObjectModel{
 
 	getSpaceIDs(){
 		return this.spaceIDs;
+	}
+
+
+	setWallInternal(flag){
+		if(flag){
+			this.wallInternal = true;
+		}
+	}
+
+	getWallInternal(){
+		return this.wallInternal;
 	}
 
 }

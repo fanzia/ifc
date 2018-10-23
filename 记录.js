@@ -293,5 +293,95 @@ readIFC.js:441 #1128: 273.9355863648935,-33.61782719450117,-4.3318939511243375
 
 {"id":"3rFteWDT5FewGQ3DzJ10yt","center":{"lon":2.0454309964408415,"lat":0.6828776788234437,"height":-2.6750000000000003},"radius":17.07358966357105,"center_m":{"lon":280.55499999999995,"lat":-28.869,"height":-2.6750000000000003},"box":{"x":9.310000000000002,"y":13.192000000000004,"z":5.55}}
 
+obj23dtiles -i 124571.obj --tileset --i3dm -f 124571_featureTable.json -p option.json -c 124571_batchTable.json
 
-obj23dtiles -i ifc.obj --tileset -p option.json
+
+obj23dtiles -i 124571.obj  --tileset -p option.json 
+
+
+
+
+tileset_t = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+  url : "public/data/output/a/test/Instanced124571/tileset.json",
+}));
+tileset_t.style = new Cesium.Cesium3DTileStyle({
+   "show": "true","color":"color('#00ff00')"
+});
+
+
+
+
+tileset = new Cesium.Cesium3DTileset({ 
+      url : "public/data/output/8748e060-9422-4757-a709-3f49c823bb3b/objs/1_0_0_0/Instanced124571/tileset.json"
+  });
+  viewer.scene.primitives.add(tileset);
+
+tileset.style = new Cesium.Cesium3DTileStyle({
+   "show": "true","color":"color('#00ff00')"
+});
+
+
+tileset2 = new Cesium.Cesium3DTileset({ 
+      url : "public/data/output/0901a9b2-8b47-476b-a59a-04332422c1ab/objs/1_0_0_0/Batchedb3dm_124571/tileset.json"
+  });
+  viewer.scene.primitives.add(tileset2);
+
+var key = "161201";
+tileset = new Cesium.Cesium3DTileset({ 
+      url : "public/data/output/8748e060-9422-4757-a709-3f49c823bb3b/objs/1_0_0_0/Instanced"+key + "/tileset.json"
+  });
+tileset.style = new Cesium.Cesium3DTileStyle({
+   "show": "true","color":"color('#ff0000')"
+});
+  viewer.scene.primitives.add(tileset);
+tileset2 = new Cesium.Cesium3DTileset({ 
+      url : "public/data/output/0901a9b2-8b47-476b-a59a-04332422c1ab/objs/1_0_0_0/Batchedb3dm_"+ key + "/tileset.json"
+  });
+  viewer.scene.primitives.add(tileset2);
+
+
+tileset = new Cesium.Cesium3DTileset({ 
+      url : "public/data/output/68894445-26f9-4e64-813c-d28e5ab6a13c/objs/3_0_0_0/Instanced"+"348327" + "/tileset.json"
+  });
+
+ viewer.scene.primitives.add(tileset);
+
+
+site
+|  0.9512615539617634 0.3083852395207191 0  781175503 |
+| -0.3083852395207191 0.9512615539617634 0 3240599760 |
+|  0.0000000000000000 0.0000000000000000 1       3900 |
+|  0.0000000000000000 0.0000000000000000 0          1 |
+
+0vctpRLVD2ngqADF_wL3TZ
+Transformation Matrix
+|  0.9512615539617634 0.3083852395207191 0  781175503 |
+| -0.3083852395207191 0.9512615539617634 0 3240599760 |
+|  0.0000000000000000 0.0000000000000000 1          0 |
+|  0.0000000000000000 0.0000000000000000 0          1 |
+#125210= IFCRECTANGLEPROFILEDEF(.AREA.,'\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\',#125209,7111.11262777097,800.);
+#125211= IFCCARTESIANPOINT((76368.8114082781,7186.18684154972,3075.));
+#125213= IFCAXIS2PLACEMENT3D(#125211,#19,#13);
+#125214= IFCEXTRUDEDAREASOLID(#125210,#125213,#19,249.999999999999);
+#125215= IFCSTYLEDITEM(#125214,(#124562),$);
+#125218= IFCSHAPEREPRESENTATION(#101,'Body','SweptSolid',(#125214));
+#125220= IFCPRODUCTDEFINITIONSHAPE($,$,(#125218));
+#125222= IFCFLOWSEGMENT('0vctpRLVD2ngqADF_wL3TZ',#41,'\X2\77E95F6298CE7BA1\X0\:\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\:1078520',$,'\X2\77E95F6298CE7BA1\X0\:\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\:142431',#125206,#125220,'1078520');
+
+
+
+0vctpRLVD2ngqADF_wL3Te
+Transformation Matrix
+|  0.9512615539617634 0.3083852395207191 0  781175503 |
+| -0.3083852395207191 0.9512615539617634 0 3240599760 |
+|  0.0000000000000000 0.0000000000000000 1          0 |
+|  0.0000000000000000 0.0000000000000000 0          1 |
+
+#127616= IFCRECTANGLEPROFILEDEF(.AREA.,'\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\',#127615,7370.00000000001,499.999999999999);
+#127617= IFCCARTESIANPOINT((67887.4239792454,12541.1868415497,3075.));
+#127619= IFCAXIS2PLACEMENT3D(#127617,#19,#15);
+#127620= IFCEXTRUDEDAREASOLID(#127616,#127619,#19,249.999999999999);
+#127621= IFCSTYLEDITEM(#127620,(#124562),$);
+#127624= IFCSHAPEREPRESENTATION(#101,'Body','SweptSolid',(#127620));
+#127626= IFCPRODUCTDEFINITIONSHAPE($,$,(#127624));
+#127628= IFCFLOWSEGMENT('0vctpRLVD2ngqADF_wL3Te',#41,'\X2\77E95F6298CE7BA1\X0\:\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\:1078529',$,'\X2\77E95F6298CE7BA1\X0\:\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\:142431',#127612,#127626,'1078529');
