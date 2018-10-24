@@ -91,6 +91,15 @@ function readIFC (model) {
 			// var list = valueList[5];
 			var list = ifcInfo.slice(ifcInfo.lastIndexOf("(")+1,ifcInfo.lastIndexOf(")")).split(",");
 			aggregatesHashMap.set(key,list);
+		}else if(ifcKey == "IFCSITE"){
+			var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+			var valueList = ifcInfo.split(",");
+			var key = valueList[5];
+			var angle = getIFCSiteDirection(key);
+			if(angle){
+				ifc.setSiteAngle(angle);
+			}
+
 		}
 	}
 
@@ -127,7 +136,7 @@ function readIFC (model) {
 		var id_objectModel = strList[0];
 		id_objectModel = id_objectModel.replace(/'/g,'');
 
-		if(id_objectModel == "0vctpRLVD2ngqADF_wL3TZ"){
+		if(id_objectModel == "0JRjfcPi1FvQdxHWaKBS29" || id_objectModel == "0TWCh4IHnFsvUblEPG6qPH"){
 			console.log('调试');
 		}
 
@@ -253,6 +262,11 @@ function readIFC (model) {
 		};
 
 		var angle = getAngleByDirection(direction);
+		angle = {
+			x : angle.x,
+			y : angle.y,
+			z : angle.z
+		};
 
 		var info = {
 			direction : direction,
@@ -300,14 +314,94 @@ function readIFC (model) {
 		var r12 = y.x,r22 = y.y,r32 = y.z;
 		var r13 = z.x,r23 = z.y,r33 = z.z;
 
-		var angle_x = Math.atan2(r32,r33);
-		var angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
-		var angle_z = Math.atan2(r21,r11);
+		var angle_x,angle_y,angle_z;
+		if(r11*r11 + r21*r21 == 0){
+			// if(r12 > 0){
+			// 	angle_y = Math.PI/2;
+			// }else{
+			// 	angle_y = -Math.PI/2;
+			// }
+			angle_y = -Math.PI/2;
+			// angle_x = Math.atan2(r32,r33);
+			// angle_z = Math.atan2(r21,r11);
+			angle_x = Math.PI;
+			angle_z = Math.atan2(r12,-r22);
+		}else {
+			angle_x = Math.atan2(r32,r33);
+			angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
+			angle_z = Math.atan2(r21,r11);
+		}
+		// angle_x = Math.atan2(r32,r33);
+		// angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
+		// angle_z = Math.atan2(r21,r11);
+
 		return {
 			x : Cesium.Math.toDegrees(angle_x),
 			y : Cesium.Math.toDegrees(angle_y),
 			z : Cesium.Math.toDegrees(angle_z)
 		};
+	}
+
+	function getAngleByDirection_2 (direction) {
+		var x = direction.x;
+		var y = direction.y;
+		var z = direction.z;
+		var m00 = x.x,m10 = x.y,m20= x.z;
+		var m01 = y.x,m11 = y.y,m21 = y.z;
+		var m02 = z.x,m12 = z.y,m22 = z.z;
+
+		var angle_x = Math.atan2(m12,m22);
+		var c2 = Math.sqrt(m00*m00 + m01*m01);
+		var angle_y = Math.atan2(-m02,c2);
+		var s1 = Math.sin(angle_x),c1 = Math.cos(angle_x);
+		var angle_z = Math.atan2(s1*m20-c1*m10,c1*m11-s1*m21);
+		return {
+			x : Cesium.Math.toDegrees(angle_x),
+			y : Cesium.Math.toDegrees(angle_y),
+			z : Cesium.Math.toDegrees(angle_z)
+		};
+	}
+
+	function getAngleByDirection_3(direction) {
+		var x = direction.x;
+		var y = direction.y;
+		var z = direction.z;
+		var r11 = x.x,r21 = x.y,r31= x.z;
+		var r12 = y.x,r22 = y.y,r32 = y.z;
+		var r13 = z.x,r23 = z.y,r33 = z.z;
+
+		var angle_x,angle_y,angle_z;
+		if(Math.abs(r31) != 1){
+			angle_y = -Math.asin(r31);
+			angle_x = Math.atan2(r32/Math.cos(angle_y),r33/Math.cos(angle_y));
+			angle_z = Math.atan2(r21/Math.cos(angle_y),r11/Math.cos(angle_y));
+		}else{
+			// angle_z = -Math.PI/2;
+			// angle_z = 0;
+			if(r31 == -1){
+				// angle_z = 0;
+				// angle_y = Math.PI/2;
+				// angle_x = angle_z + Math.atan2(r12,r13);
+				angle_y = Math.PI/2;
+				angle_x = Math.PI;
+				angle_z = angle_x -  Math.atan2(r12,r13);
+
+			}else{
+				// angle_z = Math.PI/2;
+				// angle_y = -Math.PI/2;
+				// angle_x = -angle_z + Math.atan2(-r12,-r13);
+				angle_y = -Math.PI/2;
+				angle_x = 0;
+				angle_z = Math.atan2(-r12,-r13) - angle_x;
+			}
+		}
+
+		return {
+			x : Cesium.Math.toDegrees(angle_x),
+			y : Cesium.Math.toDegrees(angle_y),
+			z : Cesium.Math.toDegrees(angle_z)
+		};
+
 	}
 
 
@@ -354,10 +448,12 @@ function readIFC (model) {
 			z : z_cartesian
 		};
 		var angle = getAngleByDirection(direction);
+		var angle_3 = getAngleByDirection_3(direction);
+		console.log(`${angle.x},${angle.y},${angle.z};${angle_3.x},${angle_3.y},${angle_3.z}`);
 
 		var info = {
 			direction : direction,
-			angle : angle
+			angle : angle_3
 		};
 		return info;
 	}
@@ -500,6 +596,36 @@ function readIFC (model) {
 		});
 	}
 
+	// 获取整个地块的方向
+	function getIFCSiteDirection (key) {
+		// #541747= IFCLOCALPLACEMENT($,#541746);
+		var str_value_IFCLOCALPLACEMENT = ifc.getHashMapStringValue(key);
+		if(!str_value_IFCLOCALPLACEMENT){
+			return null;
+		}
+
+		var list = str_value_IFCLOCALPLACEMENT.trim().split(",");
+		var id_IFCAXIS2PLACEMENT3D = list[1];
+		var str_value_IFCAXIS2PLACEMENT3D = ifc.getHashMapStringValue(id_IFCAXIS2PLACEMENT3D);
+		if(!str_value_IFCAXIS2PLACEMENT3D){
+			return null;
+		}
+		var list = str_value_IFCAXIS2PLACEMENT3D.trim().split(",");
+		var id_z_IFCDIRECTION = list[1];
+		var id_x_IFCDIRECTION = list[2];
+
+		var x_cartesian = getCartesianByDirection(id_x_IFCDIRECTION,"x");
+		var z_cartesian = getCartesianByDirection(id_z_IFCDIRECTION,"z");
+		var y_cartesian = getCartesianY(x_cartesian,z_cartesian);
+		var direction = {
+			x : x_cartesian,
+			y : y_cartesian,
+			z : z_cartesian
+		};
+
+		var angle = getAngleByDirection(direction);
+		return angle;
+	}
 
 
 	return readLines(ifc.getIFCPath(),parseLine)

@@ -16,6 +16,12 @@ class IFC{
 		this.aggregatesHashMap = new HashMap();
 
 		this.ifcSpacesHashMap = new HashMap(); 
+
+		this.siteAngle = {
+			x : 0,
+			y : 0,
+			z : 0
+		};
 	}
 
 
@@ -65,6 +71,15 @@ class IFC{
 
 	getIFCSpace(spaceID){
 		return this.ifcSpacesHashMap.get(spaceID);
+	}
+
+	// 整个场地的旋转角度
+	setSiteAngle(angle){
+		this.siteAngle = angle;
+	}
+
+	getSiteAngle(angle){
+		return this.siteAngle;
 	}
 }
 

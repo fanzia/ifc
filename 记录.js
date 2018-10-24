@@ -296,20 +296,38 @@ readIFC.js:441 #1128: 273.9355863648935,-33.61782719450117,-4.3318939511243375
 obj23dtiles -i 124571.obj --tileset --i3dm -f 124571_featureTable.json -p option.json -c 124571_batchTable.json
 
 
+obj23dtiles -i 161201.obj --tileset --i3dm -f 161201_featureTable.json -p option.json -c 161201_batchTable.json
+
+
+obj23dtiles -i 43395.obj --tileset --i3dm -f 43395_featureTable.json -p option.json -c 43395_batchTable.json
+
+
+
 obj23dtiles -i 124571.obj  --tileset -p option.json 
 
 
 
 
 tileset_t = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-  url : "public/data/output/a/test/Instanced124571/tileset.json",
+  url : "public/data/output/test/Instanced43395/tileset.json",
 }));
 tileset_t.style = new Cesium.Cesium3DTileStyle({
    "show": "true","color":"color('#00ff00')"
 });
 
 
+| 0  0 1  781264590.3866497 |
+| 0 -1 0 3240589501.3895720 |
+| 1  0 0       3200.0000000 |
+| 0  0 0          1.0000000 |
 
+|  0  0 1  781238776.6335524 |
+| -1  0 0 3240598021.5653140 |
+|  0 -1 0       3200.0000000 |
+|  0  0 0          1.0000000 |
+
+180,-90,0
+-90,0,-90
 
 tileset = new Cesium.Cesium3DTileset({ 
       url : "public/data/output/8748e060-9422-4757-a709-3f49c823bb3b/objs/1_0_0_0/Instanced124571/tileset.json"
@@ -328,14 +346,14 @@ tileset2 = new Cesium.Cesium3DTileset({
 
 var key = "161201";
 tileset = new Cesium.Cesium3DTileset({ 
-      url : "public/data/output/8748e060-9422-4757-a709-3f49c823bb3b/objs/1_0_0_0/Instanced"+key + "/tileset.json"
+      url : "public/data/output/322477f1-5921-4ccf-ada1-79e23cca2728/objs/1_0_0_0/Instanced"+key + "/tileset.json"
   });
 tileset.style = new Cesium.Cesium3DTileStyle({
    "show": "true","color":"color('#ff0000')"
 });
   viewer.scene.primitives.add(tileset);
 tileset2 = new Cesium.Cesium3DTileset({ 
-      url : "public/data/output/0901a9b2-8b47-476b-a59a-04332422c1ab/objs/1_0_0_0/Batchedb3dm_"+ key + "/tileset.json"
+      url : "public/data/output/4ffa2d74-30a9-40ec-85dc-a10d6ed4063c/objs/1_0_0_0/Batchedb3dm_"+ key + "/tileset.json"
   });
   viewer.scene.primitives.add(tileset2);
 
@@ -385,3 +403,67 @@ Transformation Matrix
 #127624= IFCSHAPEREPRESENTATION(#101,'Body','SweptSolid',(#127620));
 #127626= IFCPRODUCTDEFINITIONSHAPE($,$,(#127624));
 #127628= IFCFLOWSEGMENT('0vctpRLVD2ngqADF_wL3Te',#41,'\X2\77E95F6298CE7BA1\X0\:\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\:1078529',$,'\X2\77E95F6298CE7BA1\X0\:\X2\534A5F845F2F5934\X0\/T \X2\5F624E09901A\X0\:142431',#127612,#127626,'1078529');
+
+
+
+
+#164872= IFCRELDEFINESBYPROPERTIES('1pOMTohrPA_e3lGRUW_JQ1',#41,$,$,(#164867),#164870);
+#164876= IFCMAPPEDITEM(#161200,#3265);
+#164877= IFCSHAPEREPRESENTATION(#101,'Body','MappedRepresentation',(#164876));
+#164879= IFCPRODUCTDEFINITIONSHAPE($,$,(#164877));
+#164881= IFCCARTESIANPOINT((77987.4242421109,5436.16615573908,3000.));
+#164883= IFCAXIS2PLACEMENT3D(#164881,#15,#19);
+#164884= IFCLOCALPLACEMENT(#140,#164883);
+#164885= IFCFLOWFITTING('0TWCh4IHnFsvUblEPG6h$Y',#41,'PADI-\X2\94A27BA15F2F5934\X0\:\X2\94A27BA15F2F5934\X0\-\X2\87BA7EB98FDE63A5\X0\:1111766',$,'\X2\94A27BA15F2F5934\X0\-\X2\87BA7EB98FDE63A5\X0\',#164884,#164879,'1111766');
+| 0  0.9512615539617634 0.3083852395207191  781251365.8717760 |
+| 0 -0.3083852395207191 0.9512615539617634 3240580881.0453606 |
+| 1  0.0000000000000000 0.0000000000000000       3000.0000000 |
+| 0  0.0000000000000000 0.0000000000000000          1.0000000 |
+
+0,-90,0;90,0,90
+0,-90,0;-90,0,-90
+
+
+
+
+
+  #358828= IFCRELDEFINESBYPROPERTIES('0DrSl$B5b0dA2J08rJdrBd',#41,$,$,(#358823),#358826);
+#358832= IFCMAPPEDITEM(#161200,#3265);
+#358833= IFCSHAPEREPRESENTATION(#101,'Body','MappedRepresentation',(#358832));
+#358835= IFCPRODUCTDEFINITIONSHAPE($,$,(#358833));
+#358837= IFCCARTESIANPOINT((83887.4242421104,21436.1868415496,3000.));
+#358839= IFCAXIS2PLACEMENT3D(#358837,#15,#19);
+#358840= IFCLOCALPLACEMENT(#140,#358839);
+#358841= IFCFLOWFITTING('0TWCh4IHnFsvUblEPG6hFl',#41,'PADI-\X2\94A27BA15F2F5934\X0\:\X2\94A27BA15F2F5934\X0\-\X2\87BA7EB98FDE63A5\X0\:1112795',$,'\X2\94A27BA15F2F5934\X0\-\X2\87BA7EB98FDE63A5\X0\',#358840,#358835,'1112795');
+
+
+#428028= IFCPROPERTYSET('0TWCh4IHnFsvUbjnHG6h8h',#41,'Pset_DistributionFlowElementCommon',$,(#30239));
+#428030= IFCRELDEFINESBYPROPERTIES('3dv7sDLLj4nvprPDFrQI5J',#41,$,$,(#428025),#428028);
+#428034= IFCMAPPEDITEM(#161200,#3265);
+#428035= IFCSHAPEREPRESENTATION(#101,'Body','MappedRepresentation',(#428034));
+#428037= IFCPRODUCTDEFINITIONSHAPE($,$,(#428035));
+#428039= IFCCARTESIANPOINT((63687.3746001648,7436.1868415497,3000.));
+#428041= IFCAXIS2PLACEMENT3D(#428039,#17,#19);
+#428042= IFCLOCALPLACEMENT(#140,#428041);
+#428043= IFCFLOWFITTING('0TWCh4IHnFsvUblEPG6h8I',#41,'PADI-\X2\94A27BA15F2F5934\X0\:\X2\94A27BA15F2F5934\X0\-\X2\87BA7EB98FDE63A5\X0\:1112870',$,'\X2\94A27BA15F2F5934\X0\-\X2\87BA7EB98FDE63A5\X0\',#428042,#428037,'1112870');
+
+  | 0 -0.9512615539617634 -0.3083852395207191  781238379.5611901 |
+| 0  0.3083852395207191 -0.9512615539617634 3240587193.5123800 |
+| 1  0.0000000000000000  0.0000000000000000       3000.0000000 |
+| 0  0.0000000000000000  0.0000000000000000          1.0000000 |
+
+
+
+  tileset.readyPromise.then(function(tileset) {
+
+
+        var cartographic = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center);
+        var surface = Cesium.Cartesian3.fromRadians(2.045374294655945,0.6828822369787227,0.0);
+        var offset = Cesium.Cartesian3.fromRadians(2.0322734293624405, 0.6997899826315315, 0.0);
+        var translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
+        tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+
+
+        viewer.camera.viewBoundingSphere(tileset.boundingSphere, new Cesium.HeadingPitchRange(0, -0.5, 0));
+        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+    });

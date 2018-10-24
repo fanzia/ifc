@@ -23,6 +23,7 @@ function writeObj (model) {
 	var currentPositionHahMap = new HashMap();
 	var currentNormalHashMap = new HashMap();
 	var currentUvHashMap = new HashMap();
+	var ifc = model.getIFC();
 
 
 
@@ -259,14 +260,19 @@ function writeObj (model) {
 		writeInstanceBatchTable(key,refineType,list);
 	}
 
-	// 创建实例化模型的obj
 	function writeInstanceObj (key,refineType,list) {
 		var first = list[0];
 		var objectModel = model.getModel(first);
-
-		// 输出obj
-		var output = `mtllib ../${model.getMtlName()}\n`;
-		output += writeObjectModel(objectModel,true);
+		if(!objectModel){
+			return;
+		}
+		var output = '';
+		var geomType = objectModel.getGeomType();
+		if(geomType == "MappedRepresentation"){
+			output = writeMappedInstanceObj(key,refineType,list);
+		}else if(geomType == "SweptSolid"){
+			output = writeSweptSolidInstanceObj(key,refineType,list);
+		}
 		var outputFolderPath = model.getOutputFolderPath();
 		var objName = path.join(outputFolderPath,"objs",key,refineType+".obj");
 		try{
@@ -275,6 +281,70 @@ function writeObj (model) {
 		} catch(err) {
 			model.sendMessage("info",`写入${key}失败:${err}`);
 		}
+	}
+	// 创建实例化模型的obj
+	function writeMappedInstanceObj (key,refineType,list) {
+		var first = list[0];
+		var objectModel = model.getModel(first);
+		// 输出obj
+		var output = `mtllib ../${model.getMtlName()}\n`;
+		output += writeObjectModel(objectModel,true);
+		return output;
+	}
+
+	function writeSweptSolidInstanceObj (key,refineType,list) {
+		var first = list[0];
+		var objectModel = model.getModel(first);
+		var output = `mtllib ../${model.getMtlName()}\n`;
+		var refineInfo = objectModel.getRefineInfo();
+		if(!refineInfo){
+			return;
+		}
+
+		var size = refineInfo.size;
+		var xmax = (size.x/1000/2).toFixed(2);
+		var xmin = -xmax;
+		var ymax = (size.y/1000/2).toFixed(2);
+		var ymin = - ymax;
+		var zmax = (size.z/1000/2).toFixed(2);
+		var zmin = -zmax;
+
+
+		output += `v ${xmin} ${zmin} ${ymax}\n`
+		+`v ${xmin} ${zmin} ${ymin}\n`
+		+`v ${xmax} ${zmin} ${ymin}\n`
+		+`v ${xmax} ${zmin} ${ymax}\n`
+		+`v ${xmin} ${zmax} ${ymax}\n`
+		+`v ${xmax} ${zmax} ${ymax}\n`
+		+`v ${xmax} ${zmax} ${ymin}\n`
+		+`v ${xmin} ${zmax} ${ymin}\n`;
+
+		output += `vn 0.00 -1.00 -0.00\n`
+		+`vn 0.00 1.00 -0.00\n`
+		+`vn 0.00 0.00 1.00\n`
+		+`vn 1.00 0.00 -0.00\n`
+		+`vn 0.00 0.00 -1.00\n`
+		+`vn -1.00 0.00 -0.00\n`;
+
+		var smoothGroups = objectModel.getSmoothGroups();	
+		output += `g ${objectModel.getName()}\n`;
+		var smoothGroup = smoothGroups[0];
+		output += `s 1\n`;
+		var materialFace = smoothGroup.getMaterialFace();
+		output += `usemtl ${materialFace.keys()[0]}\n`;	
+		output += `f 1//1 2//1 3//1 \n`
+		+`f 3//1 4//1 1//1 \n`
+		+`f 5//2 6//2 7//2 \n`
+		+`f 7//2 8//2 5//2 \n`
+		+`f 1//3 4//3 6//3 \n`
+		+`f 6//3 5//3 1//3 \n`
+		+`f 4//4 3//4 7//4 \n`
+		+`f 7//4 6//4 4//4 \n`
+		+`f 3//5 2//5 8//5 \n`
+		+`f 8//5 7//5 3//5 \n`
+		+`f 2//6 1//6 5//6 \n`
+		+`f 5//6 8//6 2//6 \n`;
+		return output;
 	}
 
 
@@ -365,10 +435,11 @@ function writeObj (model) {
 			// angle_z = 360 + angle_z;
 			angle_z = -angle_z;
 		}
+		var siteAngle = ifc.getSiteAngle();
 		var orientation = [
-			angle_x,
-			angle_y,
-			angle_z
+			angle_x+siteAngle.x,
+			angle_y+siteAngle.y,
+			angle_z+siteAngle.z
 		];
 		return {
 			orientation : orientation,
@@ -382,10 +453,23 @@ function writeObj (model) {
 		var angle_y = refineInfo.angle.y - firstRefineInfo.angle.y;
 		var angle_z = refineInfo.angle.z - firstRefineInfo.angle.z;
 
-		if(angle_z<0){
-			// angle_z = 360 + angle_z;
-			angle_z = -angle_z;
-		}
+		// if(angle_z<0){
+		// 	// angle_z = 360 + angle_z;
+		// 	angle_z = -angle_z;
+		// }
+		// if(angle_x < 0){
+		// 	angle_x = -angle_x;
+		// }
+
+		// if(angle_y < 0){
+		// 	angle_y = -angle_y;
+		// }
+		// var orientation = [
+		// 	angle_x,
+		// 	angle_y,
+		// 	angle_z
+		// ]; 
+
 		var orientation = [
 			angle_x,
 			angle_y,
