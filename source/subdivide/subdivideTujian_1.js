@@ -9,6 +9,7 @@ module.exports = subdivideTujian;
 function subdivideTujian (model) {
 	var ifc = model.getIFC();
 	var models = model.getModels();
+	var containSlab = model.isContainSlab();
 	
 	// // 第0级
 	function subdivide_0(box){
@@ -17,24 +18,31 @@ function subdivideTujian (model) {
 		var models = model.getModels();
 		for(var i = 0; i < models.length;++i){
 			var objectModel = models[i];
-			if(objectModel.getIFCType() == "IfcWall" || objectModel.getIFCType() == "IfcWallStandardCase" ){
-				// || objectModel.getIFCType() == "IfcSlab"){
-				if(!objectModel.getWallInternal()){
-					objectModel.setParam(0,0,0,0);
+			// if(objectModel.getIFCType() == "IfcWall" || objectModel.getIFCType() == "IfcWallStandardCase" ){
+			// 	// || objectModel.getIFCType() == "IfcSlab"){
+			// 	if(!objectModel.getWallInternal()){
+			// 		objectModel.setParam(0,0,0,0);
+			// 	}
+			// 	// objectModel.setParam(0,0,0,0);
+			// 	// count++;
+			// }
+
+			// 是否包含楼板
+			if(containSlab){
+				if(objectModel.getIFCType() == "IfcWall" || objectModel.getIFCType() == "IfcWallStandardCase"
+					|| objectModel.getIFCType() == "IfcSlab"){
+					if(!objectModel.getWallInternal()){
+						objectModel.setParam(0,0,0,0);
+					}
 				}
-				// objectModel.setParam(0,0,0,0);
-				// count++;
+			}else{
+				if(objectModel.getIFCType() == "IfcWall" || objectModel.getIFCType() == "IfcWallStandardCase" ){
+					if(!objectModel.getWallInternal()){
+						objectModel.setParam(0,0,0,0);
+					}
+				}
 			}
-			
 		}
-		// 防止个数不满足第一级的要求
-		// if(count < count0){
-		// 	for(var i = 0; i < models.length && count < count0;++i){
-		// 		var objectModel = models[i];
-		// 		objectModel.setParam(0,0,0,0);
-		// 		count++;
-		// 	}
-		// }
 
 		var countX = model.getCountX();
 		var countY = model.getCountY();
@@ -54,16 +62,6 @@ function subdivideTujian (model) {
 			"refine":"REPLACE",
 			"children":[]
 		}
-		// if(count0 == 0){
-		// 	json = {
-		// 		"boundingVolume":{
-		// 			"region":box.toArray(),
-		// 		},
-		// 		"geometricError": 1,
-		// 		"children":[]
-		// 	}
-		// }
-
 
 		for(var i = 0; i < countX;++i){
 			for(var j = 0; j < countY;++j){
@@ -122,12 +120,19 @@ function subdivideTujian (model) {
 			}
 			var ifcType = objectModel.getIFCType();
 			
-			if(!box.isPointIn(centerWorld)  
-				// || objectModel.getKeys().length != 0
-				// || (ifcType != "IfcSlab" && ifcType != "IfcWall"
-				|| (ifcType != "IfcWall"
-				&& ifcType != "IfcWallStandardCase")){
-				continue;
+
+			if(containSlab){
+				if(!box.isPointIn(centerWorld)  
+					|| (ifcType != "IfcSlab" && ifcType != "IfcWall"
+					&& ifcType != "IfcWallStandardCase")){
+					continue;
+				}
+			}else{
+				if(!box.isPointIn(centerWorld)  
+					|| (ifcType != "IfcWall"
+					&& ifcType != "IfcWallStandardCase")){
+					continue;
+				}
 			}
 
 

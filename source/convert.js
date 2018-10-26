@@ -84,7 +84,8 @@ function convert (uuid,options) {
 			ws : options.ws,
 			instanced : options.instanced,
 			modelName : options.modelName,
-			wallDelta : options.wallDelta
+			wallDelta : options.wallDelta,
+			containSlab : options.containSlab
 		};
 
 		var ifcName = getIFCName(uuid);

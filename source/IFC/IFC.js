@@ -17,6 +17,9 @@ class IFC{
 
 		this.ifcSpacesHashMap = new HashMap(); 
 
+		// 用于自行解析的mapped类型
+		this.mappedHashMap = new HashMap();
+
 		this.siteAngle = {
 			x : 0,
 			y : 0,
@@ -80,6 +83,11 @@ class IFC{
 
 	getSiteAngle(angle){
 		return this.siteAngle;
+	}
+
+
+	getMappedHashMap(){
+		return this.mappedHashMap;
 	}
 }
 

@@ -426,20 +426,21 @@ function writeObj (model) {
 		var scale_z = (firstSize.z == 0) ? 1 :size.z/firstSize.z;
 
 		var scale = [scale_x,scale_y,scale_z];
-		var firstAngleZ = firstRefineInfo.angle.z;
-		if(firstAngleZ == -90 || firstAngleZ == 90 ){
-			scale = [scale_y,scale_x,scale_z];
-		}
+		// var firstAngleZ = firstRefineInfo.angle.z;
+		// if(firstAngleZ == -90 || firstAngleZ == 90 ){
+		// 	scale = [scale_y,scale_x,scale_z];
+		// }
 
-		if(angle_z<0){
-			// angle_z = 360 + angle_z;
-			angle_z = -angle_z;
-		}
+		// if(angle_z<0){
+		// 	// angle_z = 360 + angle_z;
+		// 	angle_z = -angle_z;
+		// }
 		var siteAngle = ifc.getSiteAngle();
+
 		var orientation = [
-			angle_x+siteAngle.x,
-			angle_y+siteAngle.y,
-			angle_z+siteAngle.z
+			angle_x+siteAngle.x +firstRefineInfo.angle.x,
+			angle_y+siteAngle.y + firstRefineInfo.angle.y,
+			angle_z+siteAngle.z + firstRefineInfo.angle.z
 		];
 		return {
 			orientation : orientation,

@@ -113,20 +113,25 @@ function initUploader () {
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">类型：</div>'
 	    +	'<select class="ifc-type">'
+	    +	'	<option value="common">通用</option>'
 	    +	'	<option value="muqiang">幕墙</option>'
 	    +	'	<option value="tujian">土建</option>'
 	    +	'	<option value="wlm">外立面</option>'
 	    +	'	<option value="shuinuan">水暖</option>'
 	    +	'	<option value="neizhuangshi">内装饰</option>'
+	    +	'	<option value="grid">grid</option>'
 	    +	'</select>'
 	    +	'</div>'
-	    // +	'<div class="file-item" >'
-	    // +	'<div class="label">0级个数：</div>'
-	    // +	'<input type="text" value="0" class="count-0">'
-	    // +	'</div>'
+	    +	'<div class="file-item" >'
+	    +	'<div class="label">包含楼板：</div>'
+	    +	'<select class="containSlab">'
+	    +	'	<option value="no">不包含</option>'
+	    +	'	<option value="yes">包含</option>'
+	    +	'</select>'
+	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">X向个数：</div>'
-	    +	'<input type="text" value="4" class="count-x">'
+	    +	'<input type="text" value="2" class="count-x">'
 	    +	'</div>'
 	   	+	'<div class="file-item" >'
 	    +	'<div class="label">Y向个数：</div>'
@@ -188,11 +193,11 @@ function initUploader () {
 	});
 }
 
-function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,callback) {
+function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,containSlab,callback) {
 	$.ajax({
 		type:"get",
 		url : "/model/" + filename + "/" + lon + "/" + lat + "/" + type+ "/" + count_0 + "/" + count_x + "/" + count_y + "/" + count_z
-			+ "/"+ instanced +"/" + modelName + "/"+wallDelta,
+			+ "/"+ instanced +"/" + modelName + "/"+wallDelta + "/" + containSlab,
 		dataType : "text",
 		success:function(result){
 			console.log(result);
@@ -237,9 +242,10 @@ function beginConvert () {
 
 	var instanced = $(".instanced").val();
 	var modelName = $(".model-name").val();
+	var containSlab = $(".containSlab").val();
 
 	date = new Date();
-	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,
+	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,containSlab,
 		function(result){
 		showMessage(result);
 		result = JSON.parse(result);

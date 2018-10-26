@@ -59,6 +59,26 @@ class Box {
         });
     }
 
+    scaledXYZ(sx,sy,sz){
+        var center = this.getCenter();
+        var lonLength = this.max_lon - this.min_lon;
+        var latLength = this.max_lat - this.min_lat;
+        var heightLength =this.max_height - this.min_height;
+
+        // var min_lon = center.lon - lonLength * scale /2;
+        // var min_lat = center.lat - latLength * scale /2;
+        // var min_height = center.height - heightLength * scale /2;
+
+        return new Box({
+            min_lon : center.lon - lonLength * sx /2,
+            max_lon : center.lon + lonLength * sx /2,
+            min_lat : center.lat - latLength * sy /2,
+            max_lat : center.lat + latLength * sy /2,
+            min_height : center.height - heightLength * sz /2,
+            max_height : center.height + heightLength * sz /2
+        });
+    }
+
     getArea(){
         return (this.max_lon - this.min_lon)* (this.max_lat - this.min_lat)
         *(this.max_height - this.min_height);

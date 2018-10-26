@@ -21,6 +21,7 @@ class Model{
 		this.instanced = defaultValue(options.instanced,true);
 		this.modelName = defaultValue(options.modelName,ifcName);
 		this.wallDelta = defaultValue(parseInt(options.wallDelta),7);
+		this.containSlab = defaultValue(options.containSlab=="yes"?true:false,false);
 		this.models = [];
 		this.box = null;
 		this.ws = defaultValue(options.ws,null);
@@ -67,6 +68,10 @@ class Model{
 
 	getWallDelta(){
 		return this.wallDelta;
+	}
+
+	isContainSlab(){
+		return this.containSlab;
 	}
 
 	// 加载一个模型

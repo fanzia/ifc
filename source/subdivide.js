@@ -4,6 +4,7 @@ var subdivideShuinuan = require("./subdivide/subdivideShuinuan_1");
 var subdivideNeizhuangshi = require("./subdivide/subdivideNeizhuangshi");
 var subdivideCommon = require("./subdivide/subdivideCommon");
 var subdivideMuqiang = require("./subdivide/subdivideMuqiang");
+var subdivideGrid = require("./subdivide/subdivideGrid");
 var fsExtra = require('fs-extra');
 var path = require('path');
 var Cesium = require("Cesium");
@@ -139,6 +140,9 @@ function subdivide (model) {
 			break;
         case "muqiang":
             json = subdivideMuqiang(model);
+            break;
+        case "grid":
+            json = subdivideGrid(model);
             break;
 		default:
 			json = subdivideCommon(model);

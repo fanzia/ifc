@@ -16,6 +16,11 @@ function readIFC (model) {
 	var spaceHashMap = ifc.getSpaceHashMap();
 	var spaceWallsHashMap = ifc.getSpaceWallsHashMap();
 	var aggregatesHashMap = ifc.getAggregatesHaspMap();
+	var mappedHashMap = ifc.getMappedHashMap();
+
+	// var mapedKey = ["IfcFlowFitting","IfcBuildingElementProxy","IfcFlowController","IfcFlowSegment","IfcFlowTerminal","IfcBeam","IfcColumn","IfcDoor"];
+	var mappedKeys = ["IfcFlowFitting".toUpperCase()];
+
 
 
 	function parseLine (line) {
@@ -99,7 +104,8 @@ function readIFC (model) {
 			if(angle){
 				ifc.setSiteAngle(angle);
 			}
-
+		}else if(mappedKeys.indexOf(ifcKey) != -1){
+			// checkMappedEntity(key);
 		}
 	}
 
@@ -148,7 +154,6 @@ function readIFC (model) {
 
 
 		var id_IFCSHAPEREPRESENTATION = str_IFCPRODUCTDEFINITIONSHAPE.slice(str_IFCPRODUCTDEFINITIONSHAPE.lastIndexOf("(")+1,str_IFCPRODUCTDEFINITIONSHAPE.lastIndexOf("))"));
-		var str_IFCSHAPEREPRESENTATION = hashmap.get(id_IFCSHAPEREPRESENTATION);
 
 
 		// #310= IFCSHAPEREPRESENTATION(#102,'Body','SweptSolid',(#309));
@@ -306,6 +311,41 @@ function readIFC (model) {
 	}
 
 	// 求解每个方向上的旋转角度
+	// function getAngleByDirection (direction) {
+	// 	var x = direction.x;
+	// 	var y = direction.y;
+	// 	var z = direction.z;
+	// 	var r11 = x.x,r21 = x.y,r31= x.z;
+	// 	var r12 = y.x,r22 = y.y,r32 = y.z;
+	// 	var r13 = z.x,r23 = z.y,r33 = z.z;
+
+	// 	var angle_x,angle_y,angle_z;
+	// 	if(r11*r11 + r21*r21 == 0){
+	// 		// if(r12 > 0){
+	// 		// 	angle_y = Math.PI/2;
+	// 		// }else{
+	// 		// 	angle_y = -Math.PI/2;
+	// 		// }
+	// 		angle_y = -Math.PI/2;
+	// 		// angle_x = Math.atan2(r32,r33);
+	// 		// angle_z = Math.atan2(r21,r11);
+	// 		angle_x = Math.PI;
+	// 		angle_z = Math.atan2(r12,-r22);
+	// 	}else {
+	// 		angle_x = Math.atan2(r32,r33);
+	// 		angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
+	// 		angle_z = Math.atan2(r21,r11);
+	// 	}
+	// 	// angle_x = Math.atan2(r32,r33);
+	// 	// angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
+	// 	// angle_z = Math.atan2(r21,r11);
+
+	// 	return {
+	// 		x : Cesium.Math.toDegrees(angle_x),
+	// 		y : Cesium.Math.toDegrees(angle_y),
+	// 		z : Cesium.Math.toDegrees(angle_z)
+	// 	};
+	// }
 	function getAngleByDirection (direction) {
 		var x = direction.x;
 		var y = direction.y;
@@ -314,33 +354,16 @@ function readIFC (model) {
 		var r12 = y.x,r22 = y.y,r32 = y.z;
 		var r13 = z.x,r23 = z.y,r33 = z.z;
 
-		var angle_x,angle_y,angle_z;
-		if(r11*r11 + r21*r21 == 0){
-			// if(r12 > 0){
-			// 	angle_y = Math.PI/2;
-			// }else{
-			// 	angle_y = -Math.PI/2;
-			// }
-			angle_y = -Math.PI/2;
-			// angle_x = Math.atan2(r32,r33);
-			// angle_z = Math.atan2(r21,r11);
-			angle_x = Math.PI;
-			angle_z = Math.atan2(r12,-r22);
-		}else {
-			angle_x = Math.atan2(r32,r33);
-			angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
-			angle_z = Math.atan2(r21,r11);
-		}
-		// angle_x = Math.atan2(r32,r33);
-		// angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
-		// angle_z = Math.atan2(r21,r11);
-
+		var angle_x = Math.atan2(r32,r33);
+		var angle_y = Math.atan2(-r31,Math.sqrt(r32*r32+r33*r33));
+		var angle_z = Math.atan2(r21,r11);
 		return {
 			x : Cesium.Math.toDegrees(angle_x),
 			y : Cesium.Math.toDegrees(angle_y),
 			z : Cesium.Math.toDegrees(angle_z)
 		};
 	}
+
 
 	function getAngleByDirection_2 (direction) {
 		var x = direction.x;
@@ -447,9 +470,9 @@ function readIFC (model) {
 			y : y_cartesian,
 			z : z_cartesian
 		};
-		var angle = getAngleByDirection(direction);
+		// var angle = getAngleByDirection(direction);
 		var angle_3 = getAngleByDirection_3(direction);
-		console.log(`${angle.x},${angle.y},${angle.z};${angle_3.x},${angle_3.y},${angle_3.z}`);
+		// console.log(`${angle.x},${angle.y},${angle.z};${angle_3.x},${angle_3.y},${angle_3.z}`);
 
 		var info = {
 			direction : direction,
@@ -627,6 +650,109 @@ function readIFC (model) {
 		return angle;
 	}
 
+	// 检查是否是mapped类型实体
+	function checkMappedEntity(ifcKey) {
+		var value = ifc.getHashMapStringValue(ifcKey);
+		if(!value){
+			return;
+		}
+
+		var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
+		var valueList = ifcInfo.split(",");
+		var id_objectModel = valueList[0];
+		var id_IFCPRODUCTDEFINITIONSHAPE = valueList[valueList.length-2];
+		var id_IFCLOCALPLACEMENT = valueList[valueList.length-3];
+		id_objectModel = id_objectModel.replace(/'/g,'');
+		var objectModel = model.getModel(id_objectModel);
+		if(!objectModel){
+			console.log(`${id_objectModel}不存在`);
+			return;
+		}
+
+
+		var str_value_IFCPRODUCTDEFINITIONSHAPE = ifc.getHashMapStringValue(id_IFCPRODUCTDEFINITIONSHAPE);
+		if(!str_value_IFCPRODUCTDEFINITIONSHAPE){
+			return;
+		}
+
+		var valueList = str_value_IFCPRODUCTDEFINITIONSHAPE.split(",");
+		var id_IFCSHAPEREPRESENTATION = str_value_IFCPRODUCTDEFINITIONSHAPE.slice(str_value_IFCPRODUCTDEFINITIONSHAPE.lastIndexOf("(")+1,str_value_IFCPRODUCTDEFINITIONSHAPE.lastIndexOf("))"));
+
+		var str_value_IFCSHAPEREPRESENTATION = ifc.getHashMapStringValue(id_IFCSHAPEREPRESENTATION);
+		if(!str_value_IFCSHAPEREPRESENTATION){
+			// console.log(`无效id${id_IFCSHAPEREPRESENTATION}`);
+			return;
+		}
+		var list = str_value_IFCSHAPEREPRESENTATION.split(",");
+		var geometryType = list[list.length-2];
+		geometryType = geometryType.replace(/'/g,'');
+		if(geometryType != "MappedRepresentation"){
+			return;
+		}
+
+		var id_IFCMAPPEDITEM =  str_value_IFCSHAPEREPRESENTATION.slice(str_value_IFCSHAPEREPRESENTATION.lastIndexOf("(")+1,str_value_IFCSHAPEREPRESENTATION.lastIndexOf("))"));
+
+		var str_value_IFCMAPPEDITEM = ifc.getHashMapStringValue(id_IFCMAPPEDITEM);
+		if(!str_value_IFCMAPPEDITEM){
+			return;
+		}
+
+		var mappedItmList = str_value_IFCMAPPEDITEM.split(",");
+
+		var str_value_IFCLOCALPLACEMENT = ifc.getHashMapStringValue(id_IFCLOCALPLACEMENT);
+		if(!str_value_IFCLOCALPLACEMENT){
+			return;
+		}
+
+		var list = str_value_IFCLOCALPLACEMENT.split(",");
+		var id_IFCAXIS2PLACEMENT3D = list[list.length-1];
+		var str_value_IFCAXIS2PLACEMENT3D = ifc.getHashMapStringValue(id_IFCAXIS2PLACEMENT3D);
+		if(!str_value_IFCAXIS2PLACEMENT3D){
+			return;
+		}
+		var list = str_value_IFCAXIS2PLACEMENT3D.split(",");
+
+		var id_IFCCARTESIANPOINT = list[0];
+		var id_z_IFCDIRECTION = list[1];
+		var id_x_IFCDIRECTION = list[2];
+
+		// 根据数值计算向量
+		var x_cartesian = getCartesianByDirection(id_x_IFCDIRECTION,"x");
+		var z_cartesian = getCartesianByDirection(id_z_IFCDIRECTION,"z");
+		var y_cartesian = getCartesianY(x_cartesian,z_cartesian);
+
+		var direction = {
+			x : x_cartesian,
+			y : y_cartesian,
+			z : z_cartesian
+		};
+
+		var angle = getAngleByDirection_3(direction);
+
+
+
+		var info = {
+			direction : direction,
+			angle : angle
+		};
+
+
+		var typeID = mappedItmList.map(replaceCode).join("_");
+
+		var mappedList = mappedHashMap.get(typeID);
+		if(mappedList){
+			mappedList.push(id_objectModel);
+		}else{
+			mappedHashMap.set(typeID,[id_objectModel]);
+		}
+
+		objectModel.setRefineType(typeID,geometryType,info);
+	}
+
+	function replaceCode (str) {
+		return str.replace(/#/g,'');
+	}
+
 
 	return readLines(ifc.getIFCPath(),parseLine)
 		.then(function(){
@@ -637,6 +763,8 @@ function readIFC (model) {
 
 					getSpaceList();
 
+
+					console.log(mappedHashMap);
 					return new Promise(function(resolve){
 						return resolve({
 							model : model
