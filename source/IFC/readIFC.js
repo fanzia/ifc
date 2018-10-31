@@ -19,8 +19,7 @@ function readIFC (model) {
 	var mappedHashMap = ifc.getMappedHashMap();
 
 	// var mapedKey = ["IfcFlowFitting","IfcBuildingElementProxy","IfcFlowController","IfcFlowSegment","IfcFlowTerminal","IfcBeam","IfcColumn","IfcDoor"];
-	var mappedKeys = ["IfcFlowFitting".toUpperCase()];
-
+	var mappedKeys = ["IfcBuildingElementProxy".toUpperCase(),"IfcFlowFitting".toUpperCase(),"IfcFlowTerminal".toUpperCase(),"IfcFlowController".toUpperCase(),"IfcFlowSegment".toUpperCase(),"IfcBeam".toUpperCase(),"IfcColumn".toUpperCase(),"IfcCovering".toUpperCase(),"IfcDoor".toUpperCase(),"IfcPlate".toUpperCase(),"IfcSlab".toUpperCase(),"IfcWallStandardCase".toUpperCase()];
 
 
 	function parseLine (line) {
@@ -33,32 +32,6 @@ function readIFC (model) {
 		var key = list[0].trim();
 		var value = list[1].trim();
 		hashmap.set(key,value);
-
-		// var ifcKey = value.slice(0,value.indexOf("("));
-		
-		// if(ifcKey == "IFCRELDEFINESBYTYPE"){
-		// 	var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
-		// 	var valueList = ifcInfo.split(",");
-		// 	var typeListStr = ifcInfo.slice(ifcInfo.lastIndexOf("(")+1,ifcInfo.lastIndexOf(")"))
-		// 	var typeID = valueList[valueList.length -1];
-		// 	var typeList = typeListStr.split(",");
-		// 	typeHashMap.set(typeID,typeList);
-		// 	// 查找每一个id model.getObjecetModel(),赋予defineType
-		// 	checkTypeList(typeID,typeList);
-		// }else if(ifcKey == "IFCRELSPACEBOUNDARY"){
-		// 	var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
-		// 	var valueList = ifcInfo.split(",");
-		// 	var spaceID = valueList[4];
-		// 	var wallID = valueList[5];
-		// 	checkSpaceBoundary(spaceID,wallID);
-		// }else if(ifcKey == "IFCRELAGGREGATES"){
-		// 	var ifcInfo = value.slice(value.indexOf("(")+1,value.length-2);
-		// 	var valueList = ifcInfo.split(",");
-		// 	var key = valueList[4];
-		// 	// var list = valueList[5];
-		// 	var list = ifcInfo.slice(ifcInfo.lastIndexOf("(")+1,ifcInfo.lastIndexOf(")")).split(",");
-		// 	aggregatesHashMap.set(key,list);
-		// }
 	}
 
 	// 第二遍读取
@@ -105,7 +78,7 @@ function readIFC (model) {
 				ifc.setSiteAngle(angle);
 			}
 		}else if(mappedKeys.indexOf(ifcKey) != -1){
-			// checkMappedEntity(key);
+			checkMappedEntity(key);
 		}
 	}
 
@@ -746,7 +719,10 @@ function readIFC (model) {
 			mappedHashMap.set(typeID,[id_objectModel]);
 		}
 
-		objectModel.setRefineType(typeID,geometryType,info);
+		var refineType = objectModel.getRefineType();
+		if(!refineType) {
+			objectModel.setRefineType(typeID,geometryType,info);	
+		}
 	}
 
 	function replaceCode (str) {

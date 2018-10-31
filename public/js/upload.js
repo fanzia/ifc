@@ -99,11 +99,13 @@ function initUploader () {
 	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">中心点经度：</div>'
-	    +	'<input type="text" value="117.19131460833329" class="center-lon">'
+	    // +	'<input type="text" value="116.44069031904608" class="center-lon">'
+	    +	'<input type="text" value="116.46982" class="center-lon">'
 	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">中心点纬度：</div>'
-	    +	'<input type="text" value="39.12627008333333" class="center-lat">'
+	    // +	'<input type="text" value="40.095012550319936" class="center-lat">'
+	    +	'<input type="text" value="40.11443" class="center-lat">'
 	    +	'</div>'
 
 	    // +	'<div class="file-item" >'
@@ -131,11 +133,11 @@ function initUploader () {
 	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">X向个数：</div>'
-	    +	'<input type="text" value="2" class="count-x">'
+	    +	'<input type="text" value="3" class="count-x">'
 	    +	'</div>'
 	   	+	'<div class="file-item" >'
 	    +	'<div class="label">Y向个数：</div>'
-	    +	'<input type="text" value="2" class="count-y">'
+	    +	'<input type="text" value="1" class="count-y">'
 	    +	'</div>'
 	    +	'<div class="file-item" >'
 	    +	'<div class="label">Z向个数：</div>'
@@ -298,19 +300,22 @@ function showMessage (result) {
 
 
 function showMap () {
+	Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2ZkMjkzNS05YTU2LTRlMDItOGViMS03N2I4Mzk1N2RmYmEiLCJpZCI6NDExOCwic2NvcGVzIjpbImFzbCIsImFzciIsImFzdyIsImdjIl0sImlhdCI6MTUzOTkzMzQwMX0.qoVS0RNT6WeCp4GygKBXMN74qqIbpXTAifxfCmxQ204';
+	var i = 256 * Math.PI / 180, t = new Cesium.Rectangle((-i),(-i),i,i);
 	viewer = new Cesium.Viewer('right',{
-		  // imageryProvider : new Cesium.WebMapTileServiceImageryProvider({
-		  //                               url : '/QuadServer/services/maps/wmts100',
-		  //                               layer : 'world_image',
-		  //                               style : 'default',
-		  //                               format : 'image/jpeg',
-		  //                               tileMatrixSetID : 'PGIS_TILE_STORE',
-		  //                               // tileMatrixLabels : ['default028mm:0', 'default028mm:1', 'default028mm:2' ...],
-		  //                               minimumLevel: 0,
-		  //                               maximumLevel: 19,
-		  //                               credit : new Cesium.Credit('world_country'),
-		  //                               tilingScheme : new Cesium.GeographicTilingScheme({rectangle : extent})
-		  //                     })
+        // imageryProvider : new Cesium.WebMapTileServiceImageryProvider({
+        //     url : '/QuadServer/services/maps/wmts100', // 地址
+        //     layer : 'world_image', //图层
+        //     style : 'default', // 默认样式
+        //     format : 'image/jpeg', //图片格式
+        //     tileMatrixSetID : 'PGIS_TILE_STORE', 
+        //     minimumLevle : 0,
+        //     maximumLevel: 19, // 最大级别
+        //     credit : new Cesium.Credit("world_country"),
+        //     tilingScheme : new Cesium.GeoBeansTilingScheme({
+        //         rectangle : t
+        //     })
+        // })
 	});
 	viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
 }

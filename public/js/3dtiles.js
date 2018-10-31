@@ -396,6 +396,12 @@ function getIfcType (type) {
 		case "shuinuan":
 			result = "水暖";
 			break;
+		case "muqiang":
+			result = "幕墙";
+			break;
+		case "gird":
+			result = "grid";
+			break;
 		default:
 			result = "通用"
 			break;

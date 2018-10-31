@@ -52,12 +52,6 @@ function subdivideCommon (model) {
 	function subdivide_1 (box,level,x,y,h) {
 		var models = model.getModels();
 		var count = 0;
-		var list = [
-			"0vctpRLVD2ngqADF_wL3VJ",
-			"0vctpRLVD2ngqADF_wL3VH",
-			"0vctpRLVD2ngqADF_wL3VN",
-			"0vctpRLVD2ngqADF_wL3VQ"
-		];
 		for(var i = 0; i < models.length;++i){
 			var objectModel = models[i];
 			var ifcType = objectModel.getIFCType();
@@ -69,9 +63,6 @@ function subdivideCommon (model) {
 				continue;
 			}
 
-			// if(list.indexOf(objectModel.getName()) != -1){
-			// 	continue;
-			// }
 			count++;
 			objectModel.setParam(level,x,y,h);
 		}

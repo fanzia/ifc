@@ -4,7 +4,7 @@ module.exports = subdivideMuqiang;
 
 function subdivideMuqiang (model) {
 	
-	// 显示筛选出来的数据
+	// 显示slab+plate会合并在一起
 	function subdivide_0(box){
 		var count = 0;
 		// var count0 = model.getCount0();
@@ -17,14 +17,6 @@ function subdivideMuqiang (model) {
 			}
 			
 		}
-		// 防止个数不满足第一级的要求
-		// if(count < count0){
-		// 	for(var i = 0; i < models.length && count < count0;++i){
-		// 		var objectModel = models[i];
-		// 		objectModel.setParam(0,0,0,0);
-		// 		count++;
-		// 	}
-		// }
 
 		var countX = model.getCountX();
 		var countY = model.getCountY();
@@ -43,15 +35,6 @@ function subdivideMuqiang (model) {
 			},
 			"children":[]
 		}
-		// if(count0 == 0){
-		// 	json = {
-		// 		"boundingVolume":{
-		// 			"region":box.toArray(),
-		// 		},
-		// 		"geometricError": 1,
-		// 		"children":[]
-		// 	}
-		// }
 
 		for(var i = 0; i < countX;++i){
 			for(var j = 0; j < countY;++j){
@@ -88,17 +71,12 @@ function subdivideMuqiang (model) {
 			var centerWorld = objectModel.getCenterWorld();
 			if(!box.isPointIn(centerWorld) 
 				// replace机制
-				// || objectModel.getKey() != null
-				// || (ifcType != "IfcSlab" && ifcType != "IfcWall"
-				// && ifcType != "IfcWallStandardCase" && ifcType != "IfcPlate")){
 				// 只显示楼板和幕墙玻璃
 				|| (ifcType != "IfcSlab" && ifcType != "IfcPlate")){
-				// || (ifcType != "IfcPlate")){
 				continue;
 			}
 			count++;
 			objectModel.setParam(level,x,y,h);
-
 		}
 
 
@@ -114,9 +92,6 @@ function subdivideMuqiang (model) {
 			 	"boundingVolume":{
 			 		"region":box.toArray()
 			 	},
-			 	// "viewerRequestVolume":{
-			 	// 	"region":viewerBox.toArray()
-			 	// },
 			 	"geometricError": 0.1,
 			 	"content":{
 			 		"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
@@ -133,7 +108,7 @@ function subdivideMuqiang (model) {
 		return json;
 	}
 
-// 
+//  显示楼板，墙体
 	function subdivide_2 (box,level,x,y,h) {
 		var models = model.getModels();
 		var count = 0;
@@ -142,7 +117,6 @@ function subdivideMuqiang (model) {
 			var ifcType = objectModel.getIFCType();
 			var centerWorld = objectModel.getCenterWorld();
 			if(!box.isPointIn(centerWorld) 
-				// || objectModel.getKey() != null
 				|| (ifcType != "IfcWall" && ifcType != "IfcBeam"
 				&& ifcType != "IfcWallStandardCase" && ifcType != "IfcColumn" && ifcType != "IfcCovering"
 				&& ifcType != "IfcSlab")){
@@ -174,40 +148,73 @@ function subdivideMuqiang (model) {
 			 	"children":[]
 			};
 			if(childJson){
-				json["children"].push(childJson);
+				json["children"] = childJson;
 			}
 		}
 		return json;
 	}
-	// 第二级
+
+	// 划分一个2×2的分割
 	function subdivide_3 (box,level,x,y,h) {
-		var count = 0;
-		var models = model.getModels();
-		for(var i = 0; i < models.length;++i){
-			var objectModel = models[i];
-			var centerWorld = objectModel.getCenterWorld();
-			if(!box.isPointIn(centerWorld) 
-				// || objectModel.getKey()!= null )
-				)
-				continue;
-			count++;
-			objectModel.setParam(level,x,y,h);
-		}
-
-		if(count == 0){
-			return null;
-		}
-
-		var json = {
-			"boundingVolume":{
-				"region":box.toArray()
-			},
-			"geometricError": 0,
-			"content":{
-				"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
+		var json = [];
+		var lonDelta = (box.max_lon - box.min_lon)/2;
+		var latDelta = (box.max_lat - box.min_lat)/2;
+		var heightDelta=(box.max_height -box.min_height)/1;
+		var gridX = x*2,gridY = y*2,gridH= h*2;
+		for(var i = 0; i < 2;++i){
+			for(var j = 0; j < 2;++j){
+				for(var k = 0; k <2;++k){
+					var lon = box.min_lon + lonDelta*i;
+					var lat = box.min_lat + latDelta*j;
+					var height = box.min_height + heightDelta*k;
+					var gridBox = new Box({
+						min_lon : lon,
+						max_lon : lon+lonDelta,
+						min_lat : lat,
+						max_lat : lat + latDelta,
+						min_height : height,
+						max_height : height + heightDelta
+					});
+					var childX = gridX+i,childY = gridY+j,childH =gridH+k;
+					var childJson = subdivide_otree_3(gridBox,level,childX,childY,childH);
+					if(childJson){
+						json.push(childJson);
+					}
+				}
 			}
 		}
 		return json;
+	}
+
+	function subdivide_otree_3 (box,level,x,y,h) {
+		 var count = 0;
+		 var models = model.getModels();
+		 for(var i = 0; i < models.length;++i){
+		 	var objectModel = models[i];
+		 	var centerWorld = objectModel.getCenterWorld();
+		 	if(!box.isPointIn(centerWorld) )
+		 		continue;
+		 	count++;
+		 	objectModel.setParam(level,x,y,h);
+		 }
+
+		 if(count == 0){
+		 	return null;
+		 }
+		 var viewerBox = box.scaledXYZ(1.8,1.8,1.4);
+		 var json = {
+		 	"boundingVolume":{
+		 		"region":box.toArray()
+		 	},
+		 	"viewerRequestVolume":{
+		 		"region":viewerBox.toArray()
+		 	},
+		 	"geometricError": 0,
+		 	"content":{
+		 		"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
+		 	}
+		 }
+		 return json;
 	}
 
 	// 测试用例
@@ -251,11 +258,11 @@ function subdivideMuqiang (model) {
 			    "tilesetVersion": "1.0.0-obj23dtiles",
 			    "gltfUpAxis": "Y"
 			},
-			"geometricError": 4,
+			"geometricError": 40,
 			"root":{
 				"transform": transform,
 				"boundingVolume": boundingVolume,
-				"geometricError" : 2,
+				"geometricError" : 20,
 				"refine": "replace",
 				"content": json["content"],
 				"children": json["children"]
