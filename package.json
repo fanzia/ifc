@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "draco3d": "^1.3.4",
+    "gltf-pipeline": "^2.0.1",
     "iconv-lite": "^0.4.24",
     "line-intersect": "^2.1.1",
     "rimraf": "^2.6.2"

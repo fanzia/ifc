@@ -163,7 +163,7 @@ function addBuffers(gltf, bufferState, name) {
         name : name,
         byteLength : buffer.length,
         extras : {
-            _obj2gltf : {
+            _pipeline : {
                 source : buffer
             }
         }
@@ -179,7 +179,7 @@ function addTexture(gltf, texture) {
     gltf.images.push({
         name : imageName,
         extras : {
-            _obj2gltf : texture
+            _pipeline : texture
         }
     });
 

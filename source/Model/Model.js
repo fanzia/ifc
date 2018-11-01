@@ -22,6 +22,7 @@ class Model{
 		this.modelName = defaultValue(options.modelName,ifcName);
 		this.wallDelta = defaultValue(parseInt(options.wallDelta),7);
 		this.containSlab = defaultValue(options.containSlab=="yes"?true:false,false);
+		this.draco = defaultValue(options.draco,true);
 		this.models = [];
 		this.box = null;
 		this.ws = defaultValue(options.ws,null);
@@ -553,6 +554,11 @@ class Model{
 	getGridValue(x,y){
 		var key = x+ "_"+y;
 		return this.gridHashMap.get(key);
+	}
+
+	// 是否压缩
+	getDraco(){
+		return this.draco;
 	}
 
 }

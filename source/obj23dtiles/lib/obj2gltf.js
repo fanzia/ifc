@@ -3,8 +3,12 @@ var Cesium = require('cesium');
 var fsExtra = require('fs-extra');
 var path = require('path');
 var createGltf = require('./createGltf');
+var gltfPipeline = require('gltf-pipeline');
 var loadObj = require('./loadObj');
 var writeGltf = require('./writeGltf');
+var processGltf = require('gltf-pipeline/lib/processGltf');
+var gltfToGlb = require('gltf-pipeline/lib/gltfToGlb');
+// var gltfToGlb = require('./gltfToGlb');
 
 var defaultValue = Cesium.defaultValue;
 var defined = Cesium.defined;
@@ -53,6 +57,9 @@ function obj2gltf(objPath, options) {
     options.overridingTextures = defaultValue(options.overridingTextures, defaultValue.EMPTY_OBJECT);
     options.logger = defaultValue(options.logger, getDefaultLogger());
     options.writer = defaultValue(options.writer, getDefaultWriter(options.outputDirectory));
+    options.draco = defaultValue(options.draco, defaults.draco);
+
+    var global_binary = options.binary;
 
     if (!defined(objPath)) {
         throw new DeveloperError('objPath is required');
@@ -88,12 +95,67 @@ function obj2gltf(objPath, options) {
             return createGltf(objData, options);
         })
         .then(function(result) {
+            // 二进制，并且不压缩
+            if(global_binary&&!options.draco){
+                return writeGltf(result.gltf, options)
+                    .then(function(gltf) {
+                        return {
+                            gltf : gltf,
+                            batchTableJson : result.batchTableJson
+                        };
+                    })
+            }
+            options.binary = false;
             return writeGltf(result.gltf, options)
                 .then(function(gltf) {
-                    return {
-                        gltf : gltf,
-                        batchTableJson : result.batchTableJson
+                    // 不是二进制,并且不压缩
+                    if(!options.draco&&!global_binary){
+                        return {
+                            gltf : gltf,
+                            batchTableJson : result.batchTableJson
+                        };
+                    }
+                    var jsonOptions = {
+                        spaces : 2
                     };
+                    var objBaseName = path.basename(objPath,".obj");
+                    var gltfName = objBaseName +".gltf";
+                    var gltfPath = path.join(path.dirname(objPath),gltfName);
+                    return fsExtra.outputJson(gltfPath, gltf, jsonOptions)
+                        .then(function(){
+                            var input = fsExtra.readJsonSync(gltfPath);
+                            var draoOptions = {
+                                dracoOptions: {
+                                    compressionLevel: 10
+                                }
+                            }    
+                            return processGltf(input, draoOptions)
+                                .then(function(results) {
+                                    var dracoGltfName = objBaseName +"_draco.gltf";
+                                    var dracoPath = path.join(path.dirname(objPath),dracoGltfName);
+                                    return fsExtra.outputJson(dracoPath, results.gltf)
+                                    .then(function () {
+                                        var gltf = fsExtra.readJsonSync(dracoPath);
+                                        options.binary = global_binary;
+                                        fsExtra.removeSync(dracoPath);
+                                        fsExtra.removeSync(gltfPath);
+                                        if(options.binary){
+                                            return gltfToGlb(gltf)
+                                                .then(function (results) {
+                                                    return {
+                                                        gltf : results.glb,
+                                                        batchTableJson : result.batchTableJson
+                                                    };
+                                                })
+                                        }else{
+                                            return {
+                                                gltf : gltf,
+                                                batchTableJson : result.batchTableJson
+                                            };
+                                        }
+                                    })
+                                })
+                        });    
                 });
         });
 }
@@ -122,7 +184,7 @@ obj2gltf.defaults = {
      * @type Boolean
      * @default false
      */
-    binary : false,
+    binary : true,
     /**
      * Gets or sets whether to write out separate buffer and texture,
      * shader files, and textures instead of embedding them in the glTF.
@@ -176,7 +238,12 @@ obj2gltf.defaults = {
      * @type Boolean
      * @default false
      */
-    materialsCommon : false
+    materialsCommon : false,
+
+    /*
+    draco 压缩，默认不压缩
+     */
+    draco : true
 };
 
 /**

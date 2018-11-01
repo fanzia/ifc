@@ -9,6 +9,7 @@ module.exports = convert23dtiles;
 function convert23dtiles (model) {
 
 	var allTasks = [];
+	var draco = model.getDraco();
 
 	function readFolderList () {
 		var outputFolderPath = model.getOutputFolderPath();
@@ -83,7 +84,8 @@ function convert23dtiles (model) {
 		var options = {
 			tilesetOptions : path.join(outputFolderPath,"option.json"),
 			tileset : true,
-			b3dm : true
+			b3dm : true,
+			draco : draco
 		};
 		var outputPath = path.join(path.dirname(objPath),fileName +".b3dm");
 		model.sendMessage("info",`开始转换${fileName}`);
@@ -101,6 +103,7 @@ function convert23dtiles (model) {
 			tilesetOptions : path.join(outputFolderPath,"option.json"),
 			tileset : true,
 			i3dm : true,
+			draco : draco,
 			customFeatureTable : path.join(path.dirname(objPath),fileName + "_featureTable.json"),
 			customBatchTable : path.join(path.dirname(objPath),fileName +"_batchTable.json")
 		};

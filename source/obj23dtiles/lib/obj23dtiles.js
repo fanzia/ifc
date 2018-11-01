@@ -120,7 +120,7 @@ function obj23dtiles(objPath, outputPath, options) {
                 return fsExtra.outputFile(outputPath, b3dm);
             })
             .then(function() {
-                console.timeEnd('Total');
+                // console.timeEnd('Total');
             })
             .catch(function(error) {
                 console.log(error.message || error);
@@ -148,7 +148,7 @@ function obj23dtiles(objPath, outputPath, options) {
                 return fsExtra.outputFile(outputPath, i3dm);
             })
             .then(function() {
-                console.timeEnd('Total');
+                // console.timeEnd('Total');
             })
             .catch(function(error) {
                 console.log(error.message || error);
@@ -169,7 +169,7 @@ function obj23dtiles(objPath, outputPath, options) {
                 return fsExtra.outputJson(outputPath, gltf, jsonOptions);
             })
             .then(function() {
-                console.timeEnd('Total');
+                // console.timeEnd('Total');
             })
             .catch(function(error) {
                 console.log(error.message || error);

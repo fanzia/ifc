@@ -40,7 +40,7 @@ function writeGltf(gltf, options) {
                 writeEmbeddedBuffer(gltf);
             }
 
-            var binaryBuffer = gltf.buffers[0].extras._obj2gltf.source;
+            var binaryBuffer = gltf.buffers[0].extras._pipeline.source;
 
             return Promise.all(promises)
                 .then(function() {
@@ -95,9 +95,12 @@ function encodeTextures(gltf) {
     // Dynamically generated PBR textures need to be encoded to png prior to being saved
     var encodePromises = [];
     var images = gltf.images;
+    if(!images){
+        return Promise.all([]);
+    }
     var length = images.length;
     for (var i = 0; i < length; ++i) {
-        encodePromises.push(encodeTexture(images[i].extras._obj2gltf));
+        encodePromises.push(encodeTexture(images[i].extras._pipeline));
     }
     return Promise.all(encodePromises);
 }
@@ -125,7 +128,7 @@ function removeEmpty(json) {
 
 function writeSeparateBuffer(gltf, options) {
     var buffer = gltf.buffers[0];
-    var source = buffer.extras._obj2gltf.source;
+    var source = buffer.extras._pipeline.source;
     var bufferUri = buffer.name + '.bin';
     buffer.uri = bufferUri;
     return options.writer(bufferUri, source);
@@ -134,7 +137,7 @@ function writeSeparateBuffer(gltf, options) {
 function writeSeparateTextures(gltf, options) {
     var images = gltf.images;
     return Promise.map(images, function(image) {
-        var texture = image.extras._obj2gltf;
+        var texture = image.extras._pipeline;
         var imageUri = image.name + texture.extension;
         image.uri = imageUri;
         return options.writer(imageUri, texture.source);
@@ -143,7 +146,7 @@ function writeSeparateTextures(gltf, options) {
 
 function writeEmbeddedBuffer(gltf) {
     var buffer = gltf.buffers[0];
-    var source = buffer.extras._obj2gltf.source;
+    var source = buffer.extras._pipeline.source;
 
     // Buffers larger than ~192MB cannot be base64 encoded due to a NodeJS limitation. Source: https://github.com/nodejs/node/issues/4266
     if (source.length > 201326580) {
@@ -155,16 +158,20 @@ function writeEmbeddedBuffer(gltf) {
 
 function writeEmbeddedTextures(gltf) {
     var buffer = gltf.buffers[0];
-    var bufferExtras = buffer.extras._obj2gltf;
+    var bufferExtras = buffer.extras._pipeline;
     var bufferSource = bufferExtras.source;
+    if(bufferSource.type == "Buffer"){
+        bufferSource = Buffer.from(bufferSource.data);
+    }
     var images = gltf.images;
+
     var imagesLength = images.length;
     var sources = [bufferSource];
     var byteOffset = bufferSource.length;
 
     for (var i = 0; i < imagesLength; ++i) {
         var image = images[i];
-        var texture = image.extras._obj2gltf;
+        var texture = image.extras._pipeline;
         var textureSource = texture.source;
         var textureByteLength = textureSource.length;
 
@@ -178,6 +185,7 @@ function writeEmbeddedTextures(gltf) {
         byteOffset += textureByteLength;
         sources.push(textureSource);
     }
+
 
     var source = getBufferPadded(Buffer.concat(sources));
     bufferExtras.source = source;

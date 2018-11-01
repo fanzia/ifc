@@ -98,6 +98,13 @@ function initUploader () {
 	    +	'</select>'
 	    +	'</div>'
 	    +	'<div class="file-item" >'
+	    +	'<div class="label">是否压缩：</div>'
+	    +	'<select class="draco">'
+	    +	'	<option value="yes">压缩</option>'
+	    +	'	<option value="no">不压缩</option>'
+	    +	'</select>'
+	    +	'</div>'
+	    +	'<div class="file-item" >'
 	    +	'<div class="label">中心点经度：</div>'
 	    // +	'<input type="text" value="116.44069031904608" class="center-lon">'
 	    +	'<input type="text" value="116.46982" class="center-lon">'
@@ -195,11 +202,10 @@ function initUploader () {
 	});
 }
 
-function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,containSlab,callback) {
+function execute (filename,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,containSlab,draco,callback) {
 	$.ajax({
 		type:"get",
-		url : "/model/" + filename + "/" + lon + "/" + lat + "/" + type+ "/" + count_0 + "/" + count_x + "/" + count_y + "/" + count_z
-			+ "/"+ instanced +"/" + modelName + "/"+wallDelta + "/" + containSlab,
+		url : `/model/${filename}/${lon}/${lat}/${type}/${count_0}/${ count_x}/${count_y}/${count_z}/${instanced}/${modelName}/${wallDelta}/${containSlab}/${draco}`,
 		dataType : "text",
 		success:function(result){
 			console.log(result);
@@ -245,9 +251,10 @@ function beginConvert () {
 	var instanced = $(".instanced").val();
 	var modelName = $(".model-name").val();
 	var containSlab = $(".containSlab").val();
+	var draco = $(".draco").val();
 
 	date = new Date();
-	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,containSlab,
+	execute(file_uuid,lon,lat,type,count_0,count_x,count_y,count_z,instanced,modelName,wallDelta,containSlab,draco,
 		function(result){
 		showMessage(result);
 		result = JSON.parse(result);
