@@ -98,7 +98,8 @@ function subdivide (model) {
             lat : Cesium.Math.toDegrees(center.getY()),
             modelName : model.getModelName(),
             instanced : model.getInstanced(),
-            wallDelta : model.getWallDelta()
+            wallDelta : model.getWallDelta(),
+            draco : model.getDraco()
         };
 
         var outputFolderPath = model.getOutputFolderPath();

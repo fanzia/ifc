@@ -302,8 +302,10 @@ function showInfo (json) {
 	var modelName = json.modelName;
 	var instanced = json.instanced;
 	var wallDelta = json.wallDelta;
+	var draco = json.draco;
 
 	instanced = instanced?"是":"否";
+	draco = draco?"是":"否";
 
 	var item = $(`#list li[uuid=${uuid}]`);
 
@@ -330,6 +332,10 @@ function showInfo (json) {
 					<div class='item'>
 						<span class='info-item'>实例化:</span>
 						<span class='info-name'>${instanced}</span>
+					</div>
+					<div class='item'>
+						<span class='info-item'>压缩:</span>
+						<span class='info-name'>${draco}</span>
 					</div>
 					<div class='item'>
 						<span class='info-item'>类型:</span>

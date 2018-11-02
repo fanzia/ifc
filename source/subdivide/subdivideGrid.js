@@ -1,10 +1,11 @@
 var Box = require("../Model/Box");
-module.exports = subdivideCommon;
-function subdivideCommon (model) {
-	function subdivide_0(box){
-		var count = 0;
-		var models = model.getModels();
 
+module.exports = subdivideGrid;
+
+
+function subdivideGrid (model) {
+
+	function subdivide_0 (box) {
 		var countX = model.getCountX();
 		var countY = model.getCountY();
 		var countZ = model.getCountZ();
@@ -12,15 +13,15 @@ function subdivideCommon (model) {
 		var lonDelta = (box.max_lon - box.min_lon)/countX;
 		var latDelta = (box.max_lat - box.min_lat)/countY;
 		var heightDelta=(box.max_height -box.min_height)/countZ;
-		var viewerBox = box.scaled(2);
+		var viewerBox = box.scaled(3);
 		var json = {
 			"boundingVolume":{
 				"region":box.toArray(),
 			},
+			"viewerRequestVolume":{
+				"region":box.toArray()
+			},
 			"geometricError": 0.01,
-			// "content":{
-			// 	"uri" : 0+ "/" +  0 +  "/" + 0 + "/" + 0  + ".cmpt"
-			// },
 			"children":[]
 		}
 
@@ -48,48 +49,40 @@ function subdivideCommon (model) {
 		}
 		return json;
 	}
-	// 第一级
+
 	function subdivide_1 (box,level,x,y,h) {
-		var models = model.getModels();
 		var count = 0;
+		var models = model.getModels();
 		for(var i = 0; i < models.length;++i){
 			var objectModel = models[i];
-			var ifcType = objectModel.getIFCType();
 			var centerWorld = objectModel.getCenterWorld();
-			if(!box.isPointIn(centerWorld) || objectModel.getKeys().length != 0
-				|| (ifcType == "IfcSlab")
-				// || (ifcType != "IfcBuildingElementProxy" 
-					// && ifcType != "IfcFlowFitting"&& ifcType != "IfcFlowController"
-					){
+			if(!box.isPointIn(centerWorld))
 				continue;
-			}
-
 			count++;
 			objectModel.setParam(level,x,y,h);
 		}
 
-		var json = null;
-		if(count != 0){
-			json = {
-			 	"boundingVolume":{
-			 		"region":box.toArray()
-			 	},
-			 	"geometricError": 0,
-			 	"content":{
-			 		"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
-			 		"boundingVolume":{
-			 			"region":box.toArray()
-			 		}
-			 	},
-			};
+		if(count == 0){
+			return null;
+		}
+		var viewerBox = box.scaledXYZ(1.8,1.8,1.5);
+		var json = {
+			"boundingVolume":{
+				"region":box.toArray()
+			},
+			"viewerRequestVolume":{
+				"region":viewerBox.toArray()
+			},
+			"geometricError": 0,
+			"content":{
+				"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
+			}
 		}
 		return json;
 	}
 
 
-
 	function subdivide () {
-		// model.sortByArea();
 		var box = model.getBoundingVolume();
 		var json = subdivide_0(box);
 		var transform = model.getTransform();
@@ -103,11 +96,11 @@ function subdivideCommon (model) {
 			    "tilesetVersion": "1.0.0-obj23dtiles",
 			    "gltfUpAxis": "Y"
 			},
-			"geometricError": 40,
+			"geometricError": 2,
 			"root":{
 				"transform": transform,
 				"boundingVolume": boundingVolume,
-				"geometricError" : 20,
+				"geometricError" : 1,
 				"refine": "ADD",
 				"content": json["content"],
 				"children": json["children"]
@@ -117,6 +110,4 @@ function subdivideCommon (model) {
 	}
 
 	return subdivide();
-
-
 }

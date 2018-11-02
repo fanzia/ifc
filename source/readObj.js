@@ -1,5 +1,5 @@
 var readLines = require('./readLines');
-var common = require("./Common");
+var Common = require("./Common");
 var ObjectModel = require("./Model/ObjectModel");
 var Point = require("./Model/Point");
 var SmoothGroup = require("./Model/SmoothGroup");
@@ -69,6 +69,7 @@ function readObj (model) {
 					// 	smoothGroup.setMaterial(currentMaterial);
 					// }
 					// smoothGroup.addMaterial(currentMaterial);
+					calculateNormals(smoothGroup);
 					currentObjectModel.addSmoothGroup(smoothGroup);
 					smoothGroup = null;
 				}
@@ -174,6 +175,7 @@ function readObj (model) {
 		}else if(/^s /i.test(line)){
 			// 没有考虑 s off关闭平滑组的情况
 			if(smoothGroup){
+				calculateNormals(smoothGroup);
 				currentObjectModel.addSmoothGroup(smoothGroup);
 			}
 			smoothGroup = new SmoothGroup();
@@ -266,10 +268,7 @@ function readObj (model) {
 		// }
 
 		if(smoothGroup){
-			// if(smoothGroup.getMaterial() == null && currentMaterial){
-			// 	smoothGroup.setMaterial(currentMaterial);
-			// }
-			// smoothGroup.addMaterial(currentMaterial);
+			calculateNormals(smoothGroup);
 			currentObjectModel.addSmoothGroup(smoothGroup);
 			smoothGroup = null;
 		}
@@ -402,6 +401,57 @@ function readObj (model) {
 		}else{
 			return false;
 		}
+	}
+
+	// 计算法向量
+	function calculateNormals(smoothGroup){
+		if(!smoothGroup){
+			return;
+		}
+		var normalsIndexes = smoothGroup.getNormalsIndexes();
+		if(normalsIndexes.length != 0){
+			return;
+		}
+		var materialFaces = smoothGroup.getMaterialFace();
+		var smoothGroupNormals = [];
+		var beginIndex = normals.length+1;
+		materialFaces.forEach( function(faces, key) {
+			for(var i = 0; i < faces.length;++i){
+				var face = faces[i];
+				var positionsIndexes = faces[i].getPositions();
+				var inputs = [
+					positions[positionsIndexes[0]-1],
+					positions[positionsIndexes[1]-1],
+					positions[positionsIndexes[2]-1]
+				];
+				var output = Common.getFaceNormals(inputs);
+				var faceNormalIndexes = [];
+				for(var j = 0; j < output.length;++j){
+					var normal = output[j];
+					var index = getNormalIndex(smoothGroupNormals,normal);
+					if(index == -1){
+						// 没有该向量则加入进去
+						smoothGroupNormals.push(normal);
+						normals.push(normal);
+						faceNormalIndexes.push(normals.length);
+					}else{
+						faceNormalIndexes.push(beginIndex + index);
+					}
+
+				}
+				face.setNormals(faceNormalIndexes);
+			}
+		});
+	}
+
+	function getNormalIndex (smoothGroupNormals,normal) {
+		for(var i = 0; i < smoothGroupNormals.length;++i){
+			var sNormal = smoothGroupNormals[i];
+			if(sNormal.getX() == normal.getX()&& sNormal.getY() == normal.getY() && sNormal.getZ() == normal.getZ()){
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	return readLines(model.getPath(), parseLine)

@@ -16,23 +16,6 @@ class SmoothGroup{
 		return this.number;
 	}
 
-	// setMaterial(name){
-	// 	this.materialName = name;
-	// }
-
-	// addFace(face){
-	// 	this.faces.push(face);
-	// }
-
-	// getMaterial(){
-	// 	return this.materialName;
-	// }
-
-	// getFaces(){
-	// 	return this.faces;
-	// }
-
-
 	addMaterial(material){
 		if(!material){
 			return;
@@ -107,6 +90,7 @@ class SmoothGroup{
 		});
 		return list;
 	}
+
 }
 
 module.exports = SmoothGroup;

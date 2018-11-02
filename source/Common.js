@@ -1,4 +1,5 @@
 var Box = require("./Model/Box");
+var Point = require("./Model/Point");
 
 class Common{
 
@@ -123,6 +124,48 @@ class Common{
 			return parseInt(a) - parseInt(b);
 		}
 		list.sort(sort_function);
+	}
+
+
+	// 计算法向量
+	static getFaceNormals(inputPoints,outputPoints){
+		if(!outputPoints) outputPoints = [];
+		var point1 = inputPoints[0];
+		var point2 = inputPoints[1];
+		var point3 = inputPoints[2];
+		var p1x = point2.getX() - point1.getX();
+		var p1y = point2.getY() - point1.getY();
+		var p1z = point2.getZ() - point1.getZ();
+
+		var p2x = point3.getX() - point1.getX();
+		var p2y = point3.getY() - point1.getY();
+		var p2z = point3.getZ() - point1.getZ();
+
+		var p3x = p1y * p2z - p1z * p2y;
+		var p3y = p1z * p2x - p1x * p2z;
+		var p3z = p1x * p2y - p1y * p2x;
+
+		var mag = Math.sqrt(p3x * p3x + p3y * p3y + p3z * p3z)
+		if (mag === 0) {
+			var n1 = new Point(0,0,0);
+			var n2 = new Point(0,0,0);
+			var n3 = new Point(0,0,0);
+			return [n1,n2,n3];
+		}else{
+			p3x = p3x / mag
+			p3y = p3y / mag
+			p3z = p3z / mag
+
+			p3x = parseFloat(parseFloat(p3x).toFixed(2));
+			p3y = parseFloat(parseFloat(p3y).toFixed(2));
+			p3z = parseFloat(parseFloat(p3z).toFixed(2));
+
+			var n1 = new Point(p3x,p3y,p3z);
+			var n2 = new Point(p3x,p3y,p3z);
+			var n3 = new Point(p3x,p3y,p3z);
+			return [n1,n2,n3];
+		}
+
 	}
 }
 

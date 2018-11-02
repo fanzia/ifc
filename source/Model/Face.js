@@ -34,6 +34,10 @@ class Face{
 	getNormals(){
 		return this.normals;
 	}
+
+	setNormals(normals){
+		this.normals = normals;
+	}
 }
 
 module.exports = Face;

@@ -1,22 +1,27 @@
 var Box = require("../Model/Box");
-
-module.exports = subdivideMuqiang;
-
-function subdivideMuqiang (model) {
+module.exports = subdivideShuinuan;
+function subdivideShuinuan (model) {
 	
-	// 显示slab+plate会合并在一起
+	// // 第0级
 	function subdivide_0(box){
 		var count = 0;
 		// var count0 = model.getCount0();
 		var models = model.getModels();
-		for(var i = 0; i < models.length ;++i){
-			var objectModel = models[i];
-			if(objectModel.getIFCType() == "IfcSlab" || objectModel.getIFCType() == "IfcPlate"){
-				objectModel.setParam(0,0,0,0);
-				count++;
-			}
-			
-		}
+		// for(var i = 0; i < models.length;++i){
+		// 	var objectModel = models[i];
+		// 	if(objectModel.getIFCType() == "IfcFlowSegment"){
+		// 		objectModel.setParam(0,0,0,0);
+		// 		count++;
+		// 	}
+		// }
+		// 防止个数不满足第一级的要求
+		// if(count < count0){
+		// 	for(var i = 0; i < models.length && count < count0;++i){
+		// 		var objectModel = models[i];
+		// 		objectModel.setParam(0,0,0,0);
+		// 		count++;
+		// 	}
+		// }
 
 		var countX = model.getCountX();
 		var countY = model.getCountY();
@@ -25,14 +30,18 @@ function subdivideMuqiang (model) {
 		var lonDelta = (box.max_lon - box.min_lon)/countX;
 		var latDelta = (box.max_lat - box.min_lat)/countY;
 		var heightDelta=(box.max_height -box.min_height)/countZ;
+		var viewerBox = box.scaled(2);
 		var json = {
 			"boundingVolume":{
 				"region":box.toArray(),
 			},
-			"geometricError": 1,
-			"content":{
-				"uri" : 0+ "/" +  0 +  "/" + 0 + "/" + 0  + ".cmpt"
+			"viewerRequestVolume":{
+				"region":box.toArray()
 			},
+			"geometricError": 0.01,
+			// "content":{
+			// 	"uri" : 0+ "/" +  0 +  "/" + 0 + "/" + 0  + ".cmpt"
+			// },
 			"children":[]
 		}
 
@@ -62,6 +71,7 @@ function subdivideMuqiang (model) {
 	}
 
 
+	// 第一级
 	function subdivide_1 (box,level,x,y,h) {
 		var models = model.getModels();
 		var count = 0;
@@ -69,19 +79,17 @@ function subdivideMuqiang (model) {
 			var objectModel = models[i];
 			var ifcType = objectModel.getIFCType();
 			var centerWorld = objectModel.getCenterWorld();
-			if(!box.isPointIn(centerWorld) 
-				// replace机制
-				// 只显示楼板和幕墙玻璃
-				|| (ifcType != "IfcSlab" && ifcType != "IfcPlate")){
+			if(!box.isPointIn(centerWorld) || objectModel.getKeys().length != 0
+				|| (ifcType != "IfcFlowSegment" && ifcType != "IfcFlowFitting"
+				&& ifcType != "IfcFlowController")){
 				continue;
 			}
 			count++;
 			objectModel.setParam(level,x,y,h);
 		}
 
-
+		var viewerBox = box.scaledXYZ(1.8,1.8,1.4);
 		var childJson = subdivide_2(box,2,x,y,h);
-		// var childJson = null;
 		var json = null;
 		if(count == 0){
 			if(childJson){
@@ -92,59 +100,17 @@ function subdivideMuqiang (model) {
 			 	"boundingVolume":{
 			 		"region":box.toArray()
 			 	},
-			 	"geometricError": 0.1,
+			 	"viewerRequestVolume":{
+			 		"region":viewerBox.toArray()
+			 	},
+			 	"geometricError": 0.001,
 			 	"content":{
 			 		"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
 			 		"boundingVolume":{
 			 			"region":box.toArray()
 			 		}
 			 	},
-			 	"children":[]
-			};
-			if(childJson){
-				json["children"].push(childJson);
-			}
-		}
-		return json;
-	}
-
-//  显示楼板，墙体
-	function subdivide_2 (box,level,x,y,h) {
-		var models = model.getModels();
-		var count = 0;
-		for(var i = 0; i < models.length;++i){
-			var objectModel = models[i];
-			var ifcType = objectModel.getIFCType();
-			var centerWorld = objectModel.getCenterWorld();
-			if(!box.isPointIn(centerWorld) 
-				|| (ifcType != "IfcWall" && ifcType != "IfcBeam"
-				&& ifcType != "IfcWallStandardCase" && ifcType != "IfcColumn" && ifcType != "IfcCovering"
-				&& ifcType != "IfcSlab")){
-				continue;
-			}
-			count++;
-			objectModel.setParam(level,x,y,h);
-
-		}
-
-		var childJson = subdivide_3(box,3,x,y,h);
-		var json = null;
-		if(count == 0){
-			if(childJson){
-				json = childJson;
-			}
-		}else{
-			json = {
-			 	"boundingVolume":{
-			 		"region":box.toArray()
-			 	},
-			 	"geometricError": 0.025,
-			 	"content":{
-			 		"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
-			 		"boundingVolume":{
-			 			"region":box.toArray()
-			 		}
-			 	},
+			 	"refine": "REPLACE",
 			 	"children":[]
 			};
 			if(childJson){
@@ -154,8 +120,7 @@ function subdivideMuqiang (model) {
 		return json;
 	}
 
-	// 划分一个2×2的分割
-	function subdivide_3 (box,level,x,y,h) {
+	function subdivide_2 (box,level,x,y,h) {
 		var json = [];
 		var lonDelta = (box.max_lon - box.min_lon)/2;
 		var latDelta = (box.max_lat - box.min_lat)/2;
@@ -176,7 +141,7 @@ function subdivideMuqiang (model) {
 						max_height : height + heightDelta
 					});
 					var childX = gridX+i,childY = gridY+j,childH =gridH+k;
-					var childJson = subdivide_otree_3(gridBox,level,childX,childY,childH);
+					var childJson = subdivide_otree_2(gridBox,level,childX,childY,childH);
 					if(childJson){
 						json.push(childJson);
 					}
@@ -186,67 +151,44 @@ function subdivideMuqiang (model) {
 		return json;
 	}
 
-	function subdivide_otree_3 (box,level,x,y,h) {
-		 var count = 0;
-		 var models = model.getModels();
-		 for(var i = 0; i < models.length;++i){
-		 	var objectModel = models[i];
-		 	var centerWorld = objectModel.getCenterWorld();
-		 	if(!box.isPointIn(centerWorld) )
-		 		continue;
-		 	count++;
-		 	objectModel.setParam(level,x,y,h);
-		 }
-
-		 if(count == 0){
-		 	return null;
-		 }
-		 var viewerBox = box.scaledXYZ(1.8,1.8,1.4);
-		 var json = {
-		 	"boundingVolume":{
-		 		"region":box.toArray()
-		 	},
-		 	"viewerRequestVolume":{
-		 		"region":viewerBox.toArray()
-		 	},
-		 	"geometricError": 0,
-		 	"content":{
-		 		"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
-		 	}
-		 }
-		 return json;
-	}
-
-	// 测试用例
-	function subdivide_test (box) {
-		var list = [];
+	// 四叉树
+	function subdivide_otree_2 (box,level,x,y,h) {
+		var count = 0;
 		var models = model.getModels();
-		for(var i = 0; i < models.length ;++i){
+		for(var i = 0; i < models.length;++i){
 			var objectModel = models[i];
-			var name = objectModel.getName();
-			if(list.indexOf(name) != -1){
-				objectModel.setParam(0,0,0,0);
-			}
+			var centerWorld = objectModel.getCenterWorld();
+			if(!box.isPointIn(centerWorld))
+				continue;
+			count++;
+			objectModel.setParam(level,x,y,h);
 		}
 
+		if(count == 0){
+			return null;
+		}
+		var viewerBox = box.scaledXYZ(1.8,1.8,1.4);
 		var json = {
 			"boundingVolume":{
-				"region":box.toArray(),
+				"region":box.toArray()
+			},
+			"viewerRequestVolume":{
+				"region":viewerBox.toArray()
 			},
 			"geometricError": 0,
 			"content":{
-				"uri" : 0+ "/" +  0 +  "/" + 0 + "/" + 0  + ".cmpt"
-			},
+				"uri" : level + "/" + h +  "/" + x + "/" + y  + ".cmpt",
+			}
 		}
 		return json;
 	}
 
+	
 
 	function subdivide () {
-		model.sortByArea();
+		// model.sortByArea();
 		var box = model.getBoundingVolume();
 		var json = subdivide_0(box);
-		// var json = subdivide_test(box);
 		var transform = model.getTransform();
 		var box = model.getBoundingVolume();
 		var boundingVolume = {
@@ -258,17 +200,19 @@ function subdivideMuqiang (model) {
 			    "tilesetVersion": "1.0.0-obj23dtiles",
 			    "gltfUpAxis": "Y"
 			},
-			"geometricError": 40,
+			"geometricError": 2,
 			"root":{
 				"transform": transform,
 				"boundingVolume": boundingVolume,
-				"geometricError" : 20,
-				"refine": "REPLACE",
+				"geometricError" : 1,
+				"refine": "ADD",
 				"content": json["content"],
 				"children": json["children"]
 			}
 		}
 		return tilesetJson;
 	}
-	return subdivide()
+
+	return subdivide();
+
 }
